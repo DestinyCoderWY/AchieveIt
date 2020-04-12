@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProjectDeviceController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.controller</a> &gt; <span class="el_source">ProjectDeviceController.java</span></div><h1>ProjectDeviceController.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.controller;
+
+import com.ecnu.achieveit.constant.EmployeeTitle;
+import com.ecnu.achieveit.constant.ProjectRole;
+import com.ecnu.achieveit.model.ProjectDevice;
+import com.ecnu.achieveit.model.ProjectMember;
+import com.ecnu.achieveit.model.ProjectMemberKey;
+import com.ecnu.achieveit.service.DeviceService;
+import com.ecnu.achieveit.service.EmployeeService;
+import com.ecnu.achieveit.service.ProjectDeviceService;
+import com.ecnu.achieveit.service.ProjectMemberService;
+import com.ecnu.achieveit.util.LogUtil;
+import com.ecnu.achieveit.util.RestResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@Transactional(rollbackFor = Exception.class)
+<span class="fc" id="L21">public class ProjectDeviceController {</span>
+
+    @Autowired
+    private ProjectMemberService projectMemberService;
+
+    @Autowired
+    private EmployeeService employeeService;
+
+    @Autowired
+    private ProjectDeviceService projectDeviceService;
+
+    @Autowired
+    private DeviceService deviceService;
+
+    @GetMapping(&quot;/device/new&quot;)
+    public Object getNew(@RequestAttribute(&quot;userId&quot;) String userId){
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if(!employeeService.checkTitle(userId, EmployeeTitle.MANAGER.getTitleName())){</span>
+<span class="nc" id="L38">            return RestResponse.noPermission(&quot;该用户不是项目经理!&quot;);</span>
+        }
+<span class="fc" id="L40">        return RestResponse.success(deviceService.queryDeviceList());</span>
+    }
+
+    @GetMapping(&quot;/device/project/{projectId}&quot;)
+    public Object listByProject(@PathVariable(&quot;projectId&quot;) String projectId){
+<span class="fc" id="L45">        return RestResponse.success(projectDeviceService.queryProjectDevice(projectId));</span>
+    }
+
+    @GetMapping(&quot;/device/owner/{employeeId}&quot;)
+    public Object listByEmployee(@PathVariable(&quot;employeeId&quot;) String employeeId){
+<span class="fc" id="L50">        return RestResponse.success(projectDeviceService.queryEmployeeDevice(employeeId));</span>
+    }
+
+    @PostMapping(&quot;/device&quot;)
+    public Object add(@RequestBody ProjectDevice projectDevice, @RequestAttribute(&quot;userId&quot;) String userId){
+<span class="fc" id="L55">        ProjectMember user = projectMemberService.queryMemberByKey(new ProjectMemberKey(projectDevice.getProjectId(),userId));</span>
+<span class="pc bpc" id="L56" title="2 of 4 branches missed.">        if(ObjectUtils.isEmpty(user) || !ProjectRole.MANAGER.in(user.getRole())){</span>
+<span class="nc" id="L57">            return RestResponse.noPermission(&quot;当前用户不是该项目的项目经理，无法为项目添加设备&quot; + user.getRole());</span>
+        }
+
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if(projectDeviceService.registerDevice(projectDevice)){</span>
+<span class="fc" id="L61">            return RestResponse.success();</span>
+        }
+<span class="nc" id="L63">        return RestResponse.fail();</span>
+    }
+
+    @PutMapping(&quot;/device/check&quot;)
+    public Object check(@RequestBody ProjectDevice projectDevice, @RequestAttribute(&quot;userId&quot;) String userId){
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">        if(!projectDeviceService.queryByKey(projectDevice).getDeviceManagerId().equals(userId)){</span>
+<span class="nc" id="L69">            return RestResponse.noPermission(&quot;当前用户不是该设备的管理员，无法核对设备完好&quot;);</span>
+        }
+
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        if(projectDeviceService.checkDevice(projectDevice)){</span>
+<span class="fc" id="L73">            return RestResponse.success();</span>
+        }
+
+<span class="nc" id="L76">        return RestResponse.fail();</span>
+    }
+
+    @PutMapping(&quot;/device/return&quot;)
+    public Object update(@RequestBody ProjectDevice projectDevice, @RequestAttribute(&quot;userId&quot;) String userId){
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">        if(!projectDeviceService.queryByKey(projectDevice).getDeviceManagerId().equals(userId)){</span>
+<span class="nc" id="L82">            return RestResponse.noPermission(&quot;当前用户不是该设备的管理员，无法核对设备完好&quot;);</span>
+        }
+
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">        if(projectDeviceService.returnDevice(projectDevice)){</span>
+<span class="fc" id="L86">            return RestResponse.success();</span>
+        }
+
+<span class="nc" id="L89">        return RestResponse.fail();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

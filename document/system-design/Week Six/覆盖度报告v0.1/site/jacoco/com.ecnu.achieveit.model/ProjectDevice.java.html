@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProjectDevice.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.model</a> &gt; <span class="el_source">ProjectDevice.java</span></div><h1>ProjectDevice.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.model;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.util.ObjectUtils;
+
+import java.io.Serializable;
+import java.util.Date;
+
+/**
+ * This class corresponds to the database table project_device
+ */
+@Getter
+<span class="fc" id="L15">@Setter</span>
+<span class="fc" id="L16">@ToString</span>
+<span class="fc" id="L17">@NoArgsConstructor</span>
+<span class="nc" id="L18">@AllArgsConstructor</span>
+public class ProjectDevice extends ProjectDeviceKey implements Serializable {
+
+<span class="fc" id="L21">    private String type;</span>
+
+    /**
+     * Database Column Remarks:
+     *   0：未归还，1：已归还
+     */
+<span class="fc" id="L27">    private Integer state;</span>
+
+<span class="fc" id="L29">    private String deviceManagerId;</span>
+
+    @DateTimeFormat(pattern = &quot;yyyy-MM-dd&quot;)
+    @JsonFormat(pattern=&quot;yyyy-MM-dd HH:mm:ss&quot;, timezone=&quot;GMT+8&quot;)
+<span class="fc" id="L33">    private Date checkinDate;</span>
+
+    /**
+     * Database Column Remarks:
+     *   以月为单位
+     */
+<span class="fc" id="L39">    private Integer totalUseTime;</span>
+
+    @DateTimeFormat(pattern = &quot;yyyy-MM-dd&quot;)
+    @JsonFormat(pattern=&quot;yyyy-MM-dd HH:mm:ss&quot;, timezone=&quot;GMT+8&quot;)
+<span class="fc" id="L43">    private Date lastVerifyDate;</span>
+
+    /**
+     * Database Column Remarks:
+     *   当state为1时使用该变量
+     */
+    @DateTimeFormat(pattern = &quot;yyyy-MM-dd&quot;)
+    @JsonFormat(pattern=&quot;yyyy-MM-dd HH:mm:ss&quot;, timezone=&quot;GMT+8&quot;)
+<span class="fc" id="L51">    private Date returnDate;</span>
+
+    private static final long serialVersionUID = 1L;
+
+    public ProjectDevice(String projectId, String deviceId, String type, Integer state, String deviceManagerId, Date checkinDate, Integer totalUseTime, Date lastVerifyDate, Date returnDate) {
+<span class="nc" id="L56">        super(projectId, deviceId);</span>
+<span class="nc" id="L57">        this.type = type;</span>
+<span class="nc" id="L58">        this.state = state;</span>
+<span class="nc" id="L59">        this.deviceManagerId = deviceManagerId;</span>
+<span class="nc" id="L60">        this.checkinDate = checkinDate;</span>
+<span class="nc" id="L61">        this.totalUseTime = totalUseTime;</span>
+<span class="nc" id="L62">        this.lastVerifyDate = lastVerifyDate;</span>
+<span class="nc" id="L63">        this.returnDate = returnDate;</span>
+<span class="nc" id="L64">    }</span>
+
+    public boolean valid(){
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        return getProjectId() != null</span>
+<span class="pc bpc" id="L68" title="4 of 8 branches missed.">                &amp;&amp; getDeviceId() != null</span>
+                &amp;&amp; type != null
+                &amp;&amp; deviceManagerId != null
+                &amp;&amp; totalUseTime != null;
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

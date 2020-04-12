@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FunctionView.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.modelview</a> &gt; <span class="el_source">FunctionView.java</span></div><h1>FunctionView.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.modelview;
+
+import com.ecnu.achieveit.model.ProjectFunctionKey;
+import com.ecnu.achieveit.util.LogUtil;
+import lombok.*;
+import org.springframework.util.ObjectUtils;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Getter
+<span class="fc" id="L15">@Setter</span>
+<span class="fc" id="L16">@NoArgsConstructor</span>
+<span class="nc" id="L17">@AllArgsConstructor</span>
+<span class="fc" id="L18">@ToString</span>
+public class FunctionView implements Serializable{
+
+<span class="fc" id="L21">    private String projectId;</span>
+
+<span class="pc" id="L23">    private List&lt;FunctionItem&gt; functions = new ArrayList&lt;&gt;();</span>
+
+    private static final long serialVersionUID = 1L;
+
+    public static FunctionView functionListToView(List&lt;ProjectFunctionKey&gt; projectFunctionKeys){
+
+<span class="fc" id="L29">        FunctionView view = new FunctionView();</span>
+
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        if(ObjectUtils.isEmpty(projectFunctionKeys)){</span>
+<span class="fc" id="L32">            return view;</span>
+        }
+
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        view.setProjectId(projectFunctionKeys.get(0).getProjectId() == null ? &quot;&quot; : projectFunctionKeys.get(0).getProjectId());</span>
+<span class="fc" id="L36">        view.setFunctions(new ArrayList&lt;&gt;());</span>
+
+<span class="fc" id="L38">        Map&lt;String, List&lt;String&gt;&gt; functionMap = projectFunctionKeys.stream().collect(</span>
+<span class="fc" id="L39">                Collectors.groupingBy(ProjectFunctionKey::getPrimaryFunction,</span>
+<span class="fc" id="L40">                        Collectors.mapping(ProjectFunctionKey::getSecondaryFunction, Collectors.toList())));</span>
+
+
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        for(String key : functionMap.keySet()){</span>
+<span class="fc" id="L44">            view.getFunctions().add(new FunctionItem(key, functionMap.get(key)));</span>
+<span class="fc" id="L45">        }</span>
+<span class="fc" id="L46">        LogUtil.i(&quot;in FunctionVIew.functionListToView&quot; + view.toString());</span>
+
+<span class="fc" id="L48">        return view;</span>
+    }
+
+    public static List&lt;ProjectFunctionKey&gt; functionViewToList(FunctionView functionView){
+
+<span class="fc" id="L53">        List&lt;ProjectFunctionKey&gt; projectFunctionKeys = new ArrayList&lt;&gt;();</span>
+
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">        if(ObjectUtils.isEmpty(functionView.getProjectId())){</span>
+<span class="nc" id="L56">            return projectFunctionKeys;</span>
+        }
+<span class="fc" id="L58">        String projectId = functionView.getProjectId();</span>
+
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        for(FunctionItem functionItem : functionView.getFunctions()){</span>
+<span class="fc" id="L61">            String primaryFunction = functionItem.getPrimaryFunction();</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">            for(String secondaryFunction : functionItem.getSecondaryFunction()){</span>
+<span class="fc" id="L63">                projectFunctionKeys.add(new ProjectFunctionKey(projectId,primaryFunction,secondaryFunction));</span>
+<span class="fc" id="L64">            }</span>
+<span class="fc" id="L65">        }</span>
+<span class="fc" id="L66">        LogUtil.i(&quot;in FunctionVIew.functionViewToList&quot; + projectFunctionKeys.toString());</span>
+
+<span class="fc" id="L68">        return projectFunctionKeys;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

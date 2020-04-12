@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReviewDefectConroller.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.controller</a> &gt; <span class="el_source">ReviewDefectConroller.java</span></div><h1>ReviewDefectConroller.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.controller;
+
+import com.ecnu.achieveit.constant.ProjectRole;
+import com.ecnu.achieveit.model.ProjectMember;
+import com.ecnu.achieveit.model.ProjectMemberKey;
+import com.ecnu.achieveit.model.ReviewDefectInfo;
+import com.ecnu.achieveit.service.ProjectMemberService;
+import com.ecnu.achieveit.service.ReviewDefectService;
+import com.ecnu.achieveit.util.RestResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+<span class="fc" id="L17">public class ReviewDefectConroller {</span>
+
+    @Autowired
+    private ReviewDefectService reviewDefectService;
+
+    @Autowired
+    private ProjectMemberService projectMemberService;
+
+    @GetMapping(&quot;/review_defect/project/{projectId}&quot;)
+    public Object listByProjectId(@PathVariable(&quot;projectId&quot;) String projectId){
+<span class="fc" id="L27">        return RestResponse.success(reviewDefectService.queryListByProjectId(projectId));</span>
+    }
+
+    @GetMapping(&quot;/review_defect/state&quot;)
+    public Object listByProjectIdAndState(@RequestParam(&quot;projectId&quot;) String projectId,
+                                          @RequestParam(&quot;state&quot;) String state){
+<span class="fc" id="L33">        Integer stateInt = Integer.parseInt(state);</span>
+
+<span class="fc" id="L35">        List&lt;ReviewDefectInfo&gt; reviewDefectInfos = reviewDefectService.queryListByProjectIdAndState(projectId,stateInt);</span>
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">        if(reviewDefectInfos == null){</span>
+<span class="nc" id="L37">            return RestResponse.fail(&quot;state只能为0或1，0表示未处理，1表示已处理&quot;);</span>
+        }
+<span class="fc" id="L39">        return RestResponse.success(reviewDefectInfos);</span>
+    }
+
+    @GetMapping(&quot;/review_defect/type&quot;)
+    public Object listByProjectIdAndType(@RequestParam(&quot;projectId&quot;) String projectId,
+                                         @RequestParam(&quot;type&quot;) String type){
+<span class="fc" id="L45">        List&lt;ReviewDefectInfo&gt; reviewDefectInfos = reviewDefectService.queryListByProjectIdAndType(projectId,type);</span>
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">        if(reviewDefectInfos == null){</span>
+<span class="nc" id="L47">            return RestResponse.fail(&quot;type只能为review或者defect&quot;);</span>
+        }
+<span class="fc" id="L49">        return RestResponse.success(reviewDefectInfos);</span>
+    }
+
+    @GetMapping(&quot;/review_defect/provider/{providerId}&quot;)
+    public Object listByProviderId(@PathVariable(&quot;providerId&quot;) String providerId,
+                                   @RequestAttribute(&quot;userId&quot;) String userId){
+<span class="fc" id="L55">        return RestResponse.success(reviewDefectService.queryListByProviderId(providerId));</span>
+    }
+
+    @GetMapping(&quot;/review_defect/solver/{solverId}&quot;)
+    public Object listBySolverId(@PathVariable(&quot;solverId&quot;) String solverId,
+                                 @RequestAttribute(&quot;userId&quot;) String userId){
+<span class="fc" id="L61">        return RestResponse.success(reviewDefectService.queryListBySolverId(solverId));</span>
+    }
+
+    @PostMapping(&quot;/review_defect&quot;)
+    public Object add(@RequestBody ReviewDefectInfo reviewDefectInfo, @RequestAttribute(&quot;userId&quot;) String userId){
+<span class="fc" id="L66">        ProjectMember user = projectMemberService.queryMemberByKey(new ProjectMemberKey(reviewDefectInfo.getProjectId(),userId));</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        if(ObjectUtils.isEmpty(user)</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">                || (!ProjectRole.TEST.in(user.getRole())</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">                    &amp;&amp; !ProjectRole.TEST_LEADER.in(user.getRole()))){</span>
+<span class="nc" id="L70">            return RestResponse.noPermission(&quot;当前用户不是该项目的测试或测试Leader，无法为项目提交评审/缺陷信息&quot; + user.getRole());</span>
+        }
+<span class="fc" id="L72">        reviewDefectInfo.setProviderId(userId);</span>
+
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        if(reviewDefectService.reportReviewDefect(reviewDefectInfo)){</span>
+<span class="fc" id="L75">            return RestResponse.success();</span>
+        }
+
+<span class="nc" id="L78">        return RestResponse.fail();</span>
+    }
+
+    @PutMapping(&quot;/review_defect&quot;)
+    public Object update(@RequestBody ReviewDefectInfo reviewDefectInfo, @RequestAttribute(&quot;userId&quot;) String userId){
+<span class="fc" id="L83">        ProjectMember user = projectMemberService.queryMemberByKey(new ProjectMemberKey(reviewDefectInfo.getProjectId(),userId));</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        if(ObjectUtils.isEmpty(user)</span>
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">                || (!ProjectRole.DEVELOPER.in(user.getRole())</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">                &amp;&amp; !ProjectRole.DEVELOP_LEADER.in(user.getRole()))){</span>
+<span class="nc" id="L87">            return RestResponse.noPermission(&quot;当前用户不是该项目的开发或开发Leader，无法为项目处理评审/缺陷信息&quot;);</span>
+        }
+
+<span class="fc" id="L90">        reviewDefectInfo.setSolverId(userId);</span>
+
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">        if(reviewDefectService.solveReviewDefect(reviewDefectInfo)){</span>
+<span class="fc" id="L93">            return RestResponse.success();</span>
+        }
+
+<span class="nc" id="L96">        return RestResponse.fail();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

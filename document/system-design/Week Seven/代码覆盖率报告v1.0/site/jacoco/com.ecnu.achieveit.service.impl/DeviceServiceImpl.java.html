@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeviceServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.service.impl</a> &gt; <span class="el_source">DeviceServiceImpl.java</span></div><h1>DeviceServiceImpl.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.service.impl;
+
+import com.ecnu.achieveit.dao.DeviceMapper;
+import com.ecnu.achieveit.model.Device;
+import com.ecnu.achieveit.service.DeviceService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@Transactional(rollbackFor = Exception.class)
+<span class="fc" id="L14">public class DeviceServiceImpl implements DeviceService {</span>
+
+    @Autowired(required = false)
+    private DeviceMapper deviceMapper;
+
+    @Override
+    public boolean addDevice(Device device) {
+<span class="nc bnc" id="L21" title="All 2 branches missed.">        return deviceMapper.insertSelective(device) == 1;</span>
+    }
+
+    @Override
+    public boolean removeDevice(Device device) {
+<span class="pc bpc" id="L26" title="1 of 2 branches missed.">        return deviceMapper.deleteByPrimaryKey(device.getDeviceId()) == 1;</span>
+    }
+
+    @Override
+    public List&lt;Device&gt; queryDeviceList() {
+<span class="fc" id="L31">        return deviceMapper.selectList();</span>
+    }
+
+    @Override
+    public Device queryDeviceById(String deviceId) {
+<span class="nc" id="L36">        return deviceMapper.selectByPrimaryKey(deviceId);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

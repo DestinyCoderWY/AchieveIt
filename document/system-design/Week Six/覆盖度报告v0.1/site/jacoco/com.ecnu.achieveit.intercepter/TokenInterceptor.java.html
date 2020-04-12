@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TokenInterceptor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.intercepter</a> &gt; <span class="el_source">TokenInterceptor.java</span></div><h1>TokenInterceptor.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.intercepter;
+
+import com.ecnu.achieveit.util.JwtConfig;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Header;
+import jdk.nashorn.internal.ir.RuntimeNode;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@Component
+<span class="fc" id="L16">public class TokenInterceptor extends HandlerInterceptorAdapter {</span>
+    @Resource
+    private JwtConfig jwtConfig ;
+    @Override
+    public boolean preHandle(HttpServletRequest request,
+                             HttpServletResponse response,
+                             Object handler) throws Exception {
+        // 地址过滤
+<span class="nc" id="L24">        String uri = request.getRequestURI() ;</span>
+<span class="nc bnc" id="L25" title="All 2 branches missed.">        if (uri.contains(&quot;/login&quot;)){</span>
+<span class="nc" id="L26">            return true ;</span>
+        }
+        // Token 验证
+<span class="nc" id="L29">        String token = request.getHeader(&quot;Authorization&quot;);</span>
+
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        if(StringUtils.isEmpty(token)){</span>
+<span class="nc" id="L32">            token = request.getParameter(jwtConfig.getHeader());</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">        }else if(token.startsWith(&quot;Bearer&quot;)){</span>
+<span class="nc" id="L34">            token = token.substring(7);</span>
+        }else{
+<span class="nc" id="L36">            throw new Exception(&quot;Authorization&quot; + &quot;不以Bearer开头。&quot;);</span>
+        }
+<span class="nc bnc" id="L38" title="All 2 branches missed.">        if(StringUtils.isEmpty(token)){</span>
+<span class="nc" id="L39">            throw new Exception(jwtConfig.getHeader()+ &quot;不能为空。&quot;);</span>
+        }
+<span class="nc" id="L41">        Claims claims = jwtConfig.getTokenClaim(token);</span>
+<span class="nc bnc" id="L42" title="All 4 branches missed.">        if(claims == null || jwtConfig.isTokenExpired(claims.getExpiration())){</span>
+<span class="nc" id="L43">            throw new Exception(jwtConfig.getHeader() + &quot;失效，请重新登录。&quot;);</span>
+        }
+        //设置 identityId 用户身份ID
+<span class="nc" id="L46">        request.setAttribute(&quot;userId&quot;, claims.getSubject());</span>
+<span class="nc" id="L47">        return true;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

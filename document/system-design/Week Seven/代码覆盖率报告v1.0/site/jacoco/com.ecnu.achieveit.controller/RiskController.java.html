@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RiskController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.controller</a> &gt; <span class="el_source">RiskController.java</span></div><h1>RiskController.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.controller;
+
+import com.ecnu.achieveit.constant.ProjectRole;
+import com.ecnu.achieveit.model.*;
+import com.ecnu.achieveit.service.ExcelService;
+import com.ecnu.achieveit.service.ProjectMemberService;
+import com.ecnu.achieveit.service.ProjectRiskService;
+import com.ecnu.achieveit.util.RestResponse;
+import com.sun.org.apache.regexp.internal.RE;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
+@RestController
+<span class="fc" id="L23">public class RiskController {</span>
+
+    @Autowired
+    private ExcelService excelService;
+
+    @Autowired
+    private ProjectRiskService riskService;
+
+    @Autowired
+    private ProjectMemberService projectMemberService;
+
+    @PostMapping(&quot;/upload/risk&quot;)
+    public Object upload(MultipartFile file){
+
+<span class="fc" id="L37">        List&lt;ProjectRisk&gt; risks = excelService.readProjectRisk(file);</span>
+
+<span class="pc bpc" id="L39" title="1 of 2 branches missed.">        if(risks == null){</span>
+<span class="nc" id="L40">            return RestResponse.fail();</span>
+        }
+
+<span class="fc" id="L43">        return RestResponse.success(risks);</span>
+    }
+
+    @GetMapping(&quot;/download/risk/{projectId}&quot;)
+    public void download(HttpServletResponse response,
+                            @PathVariable(&quot;projectId&quot;) String projectId){
+        try {
+<span class="nc" id="L50">            InputStream fis = Thread.currentThread().getContextClassLoader().getResourceAsStream(&quot;static/project_risk_template.xlsx&quot;);</span>
+<span class="nc" id="L51">            XSSFWorkbook workbook = new XSSFWorkbook(fis);</span>
+
+<span class="nc" id="L53">            List&lt;ProjectRisk&gt; risks = riskService.queryByProjectId(projectId);</span>
+<span class="nc" id="L54">            workbook = excelService.writeProjectRisk(workbook, risks);</span>
+
+<span class="nc" id="L56">            response.setContentType(&quot;application/binary;charset=ISO8859-1&quot;);</span>
+<span class="nc" id="L57">            String fileName = java.net.URLEncoder.encode(projectId + &quot;-风险列表&quot;, &quot;UTF-8&quot;);</span>
+<span class="nc" id="L58">            response.setHeader(&quot;Content-disposition&quot;, &quot;attachment; filename=&quot; + fileName + &quot;.xlsx&quot;);</span>
+<span class="nc" id="L59">            ServletOutputStream out = null;</span>
+<span class="nc" id="L60">            out = response.getOutputStream();</span>
+<span class="nc" id="L61">            workbook.write(out);</span>
+<span class="nc" id="L62">            out.flush();</span>
+<span class="nc" id="L63">            out.close();</span>
+<span class="nc" id="L64">        } catch (IOException e) {</span>
+<span class="nc" id="L65">            e.printStackTrace();</span>
+<span class="nc" id="L66">        } finally {</span>
+            //关闭文件输出流
+
+<span class="nc" id="L69">        }</span>
+<span class="nc" id="L70">        return;</span>
+    }
+
+    @GetMapping(&quot;/risk/project/{projectId}&quot;)
+    public Object listByProjectId(@PathVariable(&quot;projectId&quot;) String projectId){
+
+<span class="fc" id="L76">        List&lt;ProjectRisk&gt; projectRisks = riskService.queryByProjectId(projectId);</span>
+
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">        if(projectRisks == null){</span>
+<span class="nc" id="L79">            return RestResponse.fail();</span>
+        }
+
+<span class="fc" id="L82">        return RestResponse.success(projectRisks);</span>
+    }
+
+    /**
+     * 之所以不直接用token里的userId，是考虑到项目经理可能需要查看项目成员相关的风险
+     * */
+    @GetMapping(&quot;/risk/related/{relatedId}&quot;)
+    public Object listByRelatedId(@PathVariable(&quot;relatedId&quot;) String relatedId){
+<span class="fc" id="L90">        List&lt;ProjectRisk&gt; projectRisks = riskService.queryByRelatedId(relatedId);</span>
+
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">        if(projectRisks == null){</span>
+<span class="nc" id="L93">            return RestResponse.fail();</span>
+        }
+
+<span class="fc" id="L96">        return RestResponse.success(projectRisks);</span>
+    }
+
+    @GetMapping(&quot;/risk/owner/{ownerId}&quot;)
+    public Object listByOwnerId(@PathVariable(&quot;ownerId&quot;) String ownerId){
+<span class="fc" id="L101">        List&lt;ProjectRisk&gt; projectRisks = riskService.queryByOwnerId(ownerId);</span>
+
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        if(projectRisks == null){</span>
+<span class="nc" id="L104">            return RestResponse.fail();</span>
+        }
+
+<span class="fc" id="L107">        return RestResponse.success(projectRisks);</span>
+    }
+
+    /**
+     * 项目经理
+     * 批量新增，任何时刻都可以批量新增*/
+    @PostMapping(&quot;/risks&quot;)
+    public Object addList(@RequestBody List&lt;ProjectRisk&gt; risks,
+                          @RequestAttribute(&quot;userId&quot;) String userId){
+
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">        if(ObjectUtils.isEmpty(risks)){</span>
+<span class="nc" id="L118">            return RestResponse.fail(&quot;批量新增的Project Risk 不能为空&quot;);</span>
+        }
+
+<span class="fc" id="L121">        ProjectMember user = projectMemberService.queryMemberByKey(new ProjectMemberKey(risks.get(0).getProjectId(),userId));</span>
+<span class="pc bpc" id="L122" title="2 of 4 branches missed.">        if(ObjectUtils.isEmpty(user) || !ProjectRole.MANAGER.in(user.getRole())){</span>
+<span class="nc" id="L123">            return RestResponse.noPermission(&quot;当前用户不是该项目的项目经理，无法批量新增项目风险&quot;);</span>
+        }
+
+<span class="pc bpc" id="L126" title="1 of 2 branches missed.">        if(riskService.add(risks)){</span>
+<span class="fc" id="L127">            return RestResponse.success();</span>
+        }
+
+<span class="nc" id="L130">        return RestResponse.fail();</span>
+    }
+
+    /**
+    * 项目经理
+    * */
+    @PostMapping(&quot;/risk&quot;)
+    public Object add(@RequestBody ProjectRisk risk,
+                      @RequestAttribute(&quot;userId&quot;) String userId){
+<span class="fc" id="L139">        ProjectMember user = projectMemberService.queryMemberByKey(new ProjectMemberKey(risk.getProjectId(),userId));</span>
+<span class="pc bpc" id="L140" title="2 of 4 branches missed.">        if(ObjectUtils.isEmpty(user) || !ProjectRole.MANAGER.in(user.getRole())){</span>
+<span class="nc" id="L141">            return RestResponse.noPermission(&quot;当前用户不是该项目的项目经理，无法新增项目风险&quot;);</span>
+        }
+
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">        if(riskService.add(risk)){</span>
+<span class="fc" id="L145">            return RestResponse.success();</span>
+        }
+
+<span class="nc" id="L148">        return RestResponse.fail();</span>
+    }
+
+    /**
+     * 项目经理、风险相关人、风险责任人
+     * */
+    @PutMapping(&quot;/risk&quot;)
+    public Object update(@RequestBody ProjectRisk risk,
+                         @RequestAttribute(&quot;userId&quot;) String userId){
+<span class="fc" id="L157">        ProjectMember user = projectMemberService.queryMemberByKey(new ProjectMemberKey(risk.getProjectId(),userId));</span>
+<span class="pc bpc" id="L158" title="2 of 4 branches missed.">        if(ObjectUtils.isEmpty(user) || !ProjectRole.MANAGER.in(user.getRole())){</span>
+<span class="nc" id="L159">            return RestResponse.noPermission(&quot;当前用户不是该项目的项目经理，无法修改项目风险&quot;);</span>
+        }
+
+<span class="pc bpc" id="L162" title="1 of 2 branches missed.">        if(riskService.modify(risk)){</span>
+<span class="fc" id="L163">            return RestResponse.success();</span>
+        }
+
+<span class="nc" id="L166">        return RestResponse.fail();</span>
+    }
+
+    /**
+     * 项目经理
+     * */
+    @DeleteMapping(&quot;/risk&quot;)
+    public Object delete(@RequestBody ProjectRiskKey riskKey,
+                         @RequestAttribute(&quot;userId&quot;) String userId){
+<span class="fc" id="L175">        ProjectMember user = projectMemberService.queryMemberByKey(new ProjectMemberKey(riskKey.getProjectId(),userId));</span>
+<span class="pc bpc" id="L176" title="2 of 4 branches missed.">        if(ObjectUtils.isEmpty(user) || !ProjectRole.MANAGER.in(user.getRole())){</span>
+<span class="nc" id="L177">            return RestResponse.noPermission(&quot;当前用户不是该项目的项目经理，无法删除项目风险&quot;);</span>
+        }
+
+<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        if(riskService.remove(riskKey)){</span>
+<span class="fc" id="L181">            return RestResponse.success();</span>
+        }
+
+<span class="nc" id="L184">        return RestResponse.fail();</span>
+    }
+
+    @GetMapping(&quot;/risk/related&quot;)
+    public Object getRelated(@RequestParam(&quot;projectId&quot;) String projectId,
+                             @RequestParam(&quot;riskId&quot;) String riskId){
+<span class="fc" id="L190">        List&lt;RiskRelatedKey&gt; riskRelatedKeys = riskService.queryRelatesByProjectIdAndRiskId(projectId, riskId);</span>
+
+<span class="pc bpc" id="L192" title="1 of 2 branches missed.">        if(riskRelatedKeys == null){</span>
+<span class="nc" id="L193">            return RestResponse.fail();</span>
+        }
+
+<span class="fc" id="L196">        return RestResponse.success(riskRelatedKeys);</span>
+    }
+
+    /**
+     * 项目经理
+     * */
+    @PostMapping(&quot;/risk/related&quot;)
+    public Object addRelated(@RequestBody RiskRelatedKey relatedKey,
+                             @RequestAttribute(&quot;userId&quot;) String userId){
+<span class="fc" id="L205">        ProjectMember user = projectMemberService.queryMemberByKey(new ProjectMemberKey(relatedKey.getProjectId(),userId));</span>
+<span class="pc bpc" id="L206" title="2 of 4 branches missed.">        if(ObjectUtils.isEmpty(user) || !ProjectRole.MANAGER.in(user.getRole())){</span>
+<span class="nc" id="L207">            return RestResponse.noPermission(&quot;当前用户不是该项目的项目经理，无法为项目风险新增相关人&quot;);</span>
+        }
+
+<span class="pc bpc" id="L210" title="1 of 2 branches missed.">        if(riskService.addRelated(relatedKey)){</span>
+<span class="fc" id="L211">            return RestResponse.success();</span>
+        }
+<span class="nc" id="L213">        return RestResponse.fail();</span>
+    }
+
+    /**
+     * 项目经理
+     * */
+    @DeleteMapping(&quot;/risk/related&quot;)
+    public Object deleteRelated(@RequestBody RiskRelatedKey relatedKey,
+                                @RequestAttribute(&quot;userId&quot;) String userId){
+<span class="fc" id="L222">        ProjectMember user = projectMemberService.queryMemberByKey(new ProjectMemberKey(relatedKey.getProjectId(),userId));</span>
+<span class="pc bpc" id="L223" title="2 of 4 branches missed.">        if(ObjectUtils.isEmpty(user) || !ProjectRole.MANAGER.in(user.getRole())){</span>
+<span class="nc" id="L224">            return RestResponse.noPermission(&quot;当前用户不是该项目的项目经理，无法删除项目风险相关人&quot;);</span>
+        }
+
+<span class="pc bpc" id="L227" title="1 of 2 branches missed.">        if(riskService.removeRelated(relatedKey)){</span>
+<span class="fc" id="L228">            return RestResponse.success();</span>
+        }
+<span class="nc" id="L230">        return RestResponse.fail();</span>
+    }
+
+    /**
+     * 项目经理
+     * 批量修改，也可用作批量新增，会将原有数据删除再全部新增
+     * 请保证relatedKey中的projectId一致
+     * */
+    @PutMapping(&quot;/risk/relates&quot;)
+    public Object updateRelates(@RequestBody List&lt;RiskRelatedKey&gt; relatedKey,
+                                @RequestAttribute(&quot;userId&quot;) String userId){
+
+<span class="pc bpc" id="L242" title="1 of 2 branches missed.">        if(ObjectUtils.isEmpty(relatedKey)){</span>
+<span class="nc" id="L243">            return RestResponse.fail(&quot;不能将风险相关人修改为空&quot;);</span>
+        }
+
+<span class="fc" id="L246">        ProjectMember user = projectMemberService.queryMemberByKey(new ProjectMemberKey(relatedKey.get(0).getProjectId(),userId));</span>
+<span class="pc bpc" id="L247" title="2 of 4 branches missed.">        if(ObjectUtils.isEmpty(user) || !ProjectRole.MANAGER.in(user.getRole())){</span>
+<span class="nc" id="L248">            return RestResponse.noPermission(&quot;当前用户不是该项目的项目经理，无法修改项目风险相关人&quot;);</span>
+        }
+
+<span class="pc bpc" id="L251" title="1 of 2 branches missed.">        if(riskService.modifyRelates(relatedKey)){</span>
+<span class="fc" id="L252">            return RestResponse.success();</span>
+        }
+<span class="nc" id="L254">        return RestResponse.fail();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TimesheetController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.controller</a> &gt; <span class="el_source">TimesheetController.java</span></div><h1>TimesheetController.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.controller;
+
+import com.ecnu.achieveit.model.Timesheet;
+import com.ecnu.achieveit.service.TimesheetService;
+import com.ecnu.achieveit.service.impl.TimesheetServiceImpl;
+import com.ecnu.achieveit.util.LogUtil;
+import com.ecnu.achieveit.util.RestResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.sql.Date;
+import java.util.List;
+
+import static com.ecnu.achieveit.constant.TimesheetState.BACK;
+import static com.ecnu.achieveit.constant.TimesheetState.CONFIRMED;
+
+@RestController
+<span class="fc" id="L18">public class TimesheetController {</span>
+    @Autowired(required = false)
+    private TimesheetService timesheetService;
+
+    @GetMapping(&quot;/timesheet/projectid&quot;)
+    public Object listProjectId(@RequestAttribute(&quot;userId&quot;)String employeeId){
+<span class="fc" id="L24">        List&lt;String&gt; result = timesheetService.queryProjectIdByEmployeeId(employeeId);</span>
+
+<span class="pc bpc" id="L26" title="1 of 2 branches missed.">        if(result == null) return RestResponse.fail();</span>
+<span class="fc" id="L27">        return RestResponse.success(result);</span>
+    }
+
+    @GetMapping(&quot;/timesheet/primaryfunction&quot;)
+    public Object listPrimaryFunction(@RequestParam(&quot;projectId&quot;)String projectId){
+<span class="fc" id="L32">        List&lt;String&gt; result = timesheetService.queryPrimaryFunction(projectId);</span>
+<span class="pc bpc" id="L33" title="1 of 2 branches missed.">        if(result == null) return RestResponse.fail();</span>
+<span class="fc" id="L34">        return RestResponse.success(result);</span>
+    }
+
+    @GetMapping(&quot;/timesheet/secondaryfunction&quot;)
+    public Object listSecondaryFunction(@RequestParam(&quot;projectId&quot;)String projectId,
+                                        @RequestParam(&quot;primaryFunction&quot;)String primaryFunction){
+<span class="fc" id="L40">        List&lt;String&gt; result = timesheetService.querySecondaryFunction(projectId,primaryFunction);</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">        if(result == null) return RestResponse.fail();</span>
+<span class="fc" id="L42">        return RestResponse.success(result);</span>
+    }
+
+    @GetMapping(&quot;/timesheet/primaryactivity&quot;)
+    public Object listPrimaryActivity(){
+<span class="fc" id="L47">        List&lt;String&gt; result = timesheetService.queryPrimaryActivity();</span>
+
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        if(result == null) return RestResponse.fail();</span>
+<span class="fc" id="L50">        return RestResponse.success(result);</span>
+    }
+
+    @GetMapping(&quot;/timesheet/secondaryactivity&quot;)
+    public Object listSecondaryActivity(@RequestParam(&quot;primaryActivity&quot;)String primaryActivity){
+<span class="fc" id="L55">        List&lt;String&gt; result = timesheetService.querySecondaryActivity(primaryActivity);</span>
+
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        if(result == null) return RestResponse.fail();</span>
+<span class="fc" id="L58">        return RestResponse.success(result);</span>
+    }
+
+    @PostMapping(&quot;/timesheet&quot;)
+    public Object saveTimesheet(Timesheet record,
+                                @RequestAttribute(&quot;userId&quot;)String employeeId){
+<span class="fc" id="L64">        LogUtil.i(&quot;record = &quot; + record + &quot;, employeeId = &quot; + employeeId);</span>
+<span class="fc" id="L65">        LogUtil.i(&quot;record.getDate() = &quot; + record.getDate().toString());</span>
+        //先判断是否超时
+<span class="fc" id="L67">        Date previousDate = new Date(record.getDate().getTime());</span>
+<span class="fc" id="L68">        LogUtil.i(&quot;previousDate = &quot; + previousDate);</span>
+<span class="fc" id="L69">        Date currentDate = new java.sql.Date(System.currentTimeMillis());</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">        if(isOvertime(previousDate,currentDate)) return RestResponse.fail(&quot;超时填写&quot;);</span>
+
+
+<span class="fc" id="L73">        record.setEmployeeId(employeeId);</span>
+<span class="fc" id="L74">        boolean result = timesheetService.insertTimesheet(record);</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">        if(!result) return RestResponse.fail(&quot;失败&quot;);</span>
+<span class="fc" id="L76">        return RestResponse.success();</span>
+    }
+
+    @GetMapping(&quot;/timesheet/user&quot;)
+    /**
+     * 前端应对不同的状态有不同的权限，例如“草稿”和“驳回”是可以编辑的，“已提交和已确认”是不能编辑的
+     */
+    public Object listTimesheetForEdit(@RequestAttribute(&quot;userId&quot;)String employeeId){
+<span class="fc" id="L84">        List&lt;Timesheet&gt; result = timesheetService.queryTimesheetByEmployeeId(employeeId);</span>
+
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">        if(result == null) return RestResponse.fail();</span>
+<span class="fc" id="L87">        return RestResponse.success(result);</span>
+    }
+
+    @GetMapping(&quot;/timesheet/boss&quot;)
+    public Object listTimesheetForConfirm(@RequestAttribute(&quot;userId&quot;) String bossId){
+<span class="fc" id="L92">        System.out.println(&quot;bossId = &quot; + bossId);</span>
+<span class="fc" id="L93">        List&lt;Timesheet&gt; result = timesheetService.queryTimesheetByBossId(bossId);</span>
+
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">        if(result == null) return RestResponse.fail(&quot;yes&quot;);</span>
+<span class="fc" id="L96">        return RestResponse.success(result);</span>
+    }
+
+    @PostMapping(&quot;/timesheet/confirm&quot;)
+    public Object changeTimesheetState(@RequestParam(&quot;timesheetId&quot;)String timesheetId,
+                                       @RequestParam(&quot;state&quot;)String state){
+<span class="pc bpc" id="L102" title="3 of 4 branches missed.">        if(!(state.equals(CONFIRMED.getState()) || state.equals(BACK.getState()))){</span>
+<span class="nc" id="L103">            return RestResponse.fail(&quot;状态设置错误&quot;);</span>
+        }
+<span class="fc" id="L105">        boolean result = timesheetService.updateStateByTimesheetId(timesheetId,state);</span>
+
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">        if(!result) return RestResponse.fail();</span>
+<span class="fc" id="L108">        return RestResponse.success();</span>
+    }
+
+    public static boolean isOvertime(Date date1,Date date2){
+<span class="fc" id="L112">        Date obj1 = java.sql.Date.valueOf(date1.toString());</span>
+<span class="fc" id="L113">        Date obj2 = java.sql.Date.valueOf(date2.toString());</span>
+<span class="fc" id="L114">        long time1 = obj1.getTime();</span>
+<span class="fc" id="L115">        long time2 = obj2.getTime();</span>
+<span class="fc" id="L116">        final long threeDays = 3*24*3600*1000;</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">        return ((time1+threeDays) &gt;= time2) ? false:true;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

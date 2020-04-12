@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProjectFunctionServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.service.impl</a> &gt; <span class="el_source">ProjectFunctionServiceImpl.java</span></div><h1>ProjectFunctionServiceImpl.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.service.impl;
+
+import com.ecnu.achieveit.dao.ProjectFunctionMapper;
+import com.ecnu.achieveit.model.ProjectFunctionKey;
+import com.ecnu.achieveit.modelview.FunctionItem;
+import com.ecnu.achieveit.modelview.FunctionView;
+import com.ecnu.achieveit.service.ProjectFunctionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
+import java.util.List;
+
+@Service
+@Transactional(rollbackFor = Exception.class)
+<span class="fc" id="L17">public class ProjectFunctionServiceImpl implements ProjectFunctionService {</span>
+
+    @Autowired(required = false)
+    private ProjectFunctionMapper projectFunctionMapper;
+
+    @Override
+    public boolean addProjectFunction(FunctionView functionView) {
+
+<span class="fc" id="L25">        FunctionView oldFunctionView = queryProjectFunctionView(functionView.getProjectId());</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        if(!ObjectUtils.isEmpty(oldFunctionView.getFunctions())){</span>
+<span class="fc" id="L27">            return false;</span>
+        }
+
+<span class="fc" id="L30">        List&lt;ProjectFunctionKey&gt; functionKeys = FunctionView.functionViewToList(functionView);</span>
+
+<span class="pc bpc" id="L32" title="1 of 2 branches missed.">        if(ObjectUtils.isEmpty(functionKeys)){</span>
+<span class="nc" id="L33">            return false;</span>
+        }
+
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        for(ProjectFunctionKey functionKey : functionKeys){</span>
+<span class="fc" id="L37">            projectFunctionMapper.insert(functionKey);</span>
+<span class="fc" id="L38">        }</span>
+
+<span class="fc" id="L40">        return true;</span>
+    }
+
+    @Override
+    public boolean updateProjectFunction(FunctionView functionView) {
+<span class="fc" id="L45">        List&lt;ProjectFunctionKey&gt; functionKeys = FunctionView.functionViewToList(functionView);</span>
+
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if(ObjectUtils.isEmpty(functionKeys)){</span>
+<span class="nc" id="L48">            return false;</span>
+        }
+
+<span class="fc" id="L51">        List&lt;ProjectFunctionKey&gt; oldFunctionKeys = queryProjectFunction(functionKeys.get(0).getProjectId());</span>
+
+        //删除old中多余的Function
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        for(ProjectFunctionKey oldFunctionKey :oldFunctionKeys){</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">            if(!functionKeys.contains(oldFunctionKey)){</span>
+<span class="fc" id="L56">                projectFunctionMapper.deleteByPrimaryKey(oldFunctionKey);</span>
+            }
+<span class="fc" id="L58">        }</span>
+
+        //添加新的Function
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        for(ProjectFunctionKey functionKey :functionKeys){</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">            if(!oldFunctionKeys.contains(functionKey)){</span>
+<span class="fc" id="L63">                projectFunctionMapper.insert(functionKey);</span>
+            }
+<span class="fc" id="L65">        }</span>
+<span class="fc" id="L66">        return true;</span>
+    }
+
+    @Override
+    public FunctionView queryProjectFunctionView(String projectId) {
+<span class="fc" id="L71">        return FunctionView.functionListToView(</span>
+<span class="fc" id="L72">                projectFunctionMapper.selectListByProjectId(projectId));</span>
+    }
+
+    @Override
+    public List&lt;ProjectFunctionKey&gt; queryProjectFunction(String projectId) {
+<span class="fc" id="L77">        return projectFunctionMapper.selectListByProjectId(projectId);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

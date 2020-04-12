@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmployeeTitle.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.constant</a> &gt; <span class="el_source">EmployeeTitle.java</span></div><h1>EmployeeTitle.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.constant;
+
+<span class="fc" id="L3">public enum EmployeeTitle {</span>
+
+    /**
+     * 员工类别
+     */
+<span class="fc" id="L8">    MANAGER(&quot;manager&quot;, &quot;项目经理&quot;),</span>
+
+<span class="fc" id="L10">    BOSS(&quot;boss&quot;, &quot;项目上级&quot;),</span>
+
+<span class="fc" id="L12">    DEVELOPER(&quot;developer&quot;, &quot;开发&quot;),</span>
+
+<span class="fc" id="L14">    EPG_LEADER(&quot;epg_leader&quot;, &quot;EPG Leader&quot;),</span>
+
+<span class="fc" id="L16">    ORG_CONFIG(&quot;org_config&quot;, &quot;组织级配置管理员&quot;),</span>
+
+<span class="fc" id="L18">    QA_LEADER(&quot;qa_leader&quot;, &quot;QA经理&quot;),</span>
+
+<span class="fc" id="L20">    EPG(&quot;epg&quot;, &quot;EPG&quot;),</span>
+
+<span class="fc" id="L22">    QA(&quot;qa&quot;, &quot;QA&quot;),</span>
+
+<span class="fc" id="L24">    TEST(&quot;test&quot;, &quot;测试&quot;);</span>
+
+    private String title;
+
+    private String titleName;
+
+    public String getTitleName() {
+<span class="fc" id="L31">        return titleName;</span>
+    }
+
+    public void setTitleName(String titleName) {
+<span class="nc" id="L35">        this.titleName = titleName;</span>
+<span class="nc" id="L36">    }</span>
+
+    public String getTitle() {
+<span class="nc" id="L39">        return title;</span>
+    }
+
+    public void setTitle(String title) {
+<span class="nc" id="L43">        this.title = title;</span>
+<span class="nc" id="L44">    }</span>
+
+<span class="fc" id="L46">    EmployeeTitle(String title, String titleName){</span>
+<span class="fc" id="L47">        this.title = title;</span>
+<span class="fc" id="L48">        this.titleName = titleName;</span>
+<span class="fc" id="L49">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

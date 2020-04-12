@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProjectMember.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.model</a> &gt; <span class="el_source">ProjectMember.java</span></div><h1>ProjectMember.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.model;
+
+import lombok.*;
+
+import java.io.Serializable;
+
+/**
+ * This class corresponds to the database table project_member
+ */
+@Getter
+<span class="fc" id="L11">@Setter</span>
+<span class="nc" id="L12">@ToString</span>
+<span class="fc" id="L13">@NoArgsConstructor</span>
+<span class="nc" id="L14">@AllArgsConstructor</span>
+public class ProjectMember extends ProjectMemberKey implements Serializable {
+
+<span class="nc" id="L17">    private String bossInProjectId;</span>
+
+    /**
+     * Database Column Remarks:
+     *   可选择多个role，用；分割
+     */
+<span class="fc" id="L23">    private String role;</span>
+
+<span class="nc" id="L25">    private String accessGit;</span>
+
+<span class="nc" id="L27">    private String accessFileSystem;</span>
+
+<span class="nc" id="L29">    private Integer inEmailList;</span>
+
+<span class="nc" id="L31">    private Integer inTimesheetModule;</span>
+
+<span class="nc" id="L33">    private Integer faultTrack;</span>
+
+    private static final long serialVersionUID = 1L;
+
+    public ProjectMember(String projectId, String employeeId, String bossInProjectId, String role, String accessGit, String accessFileSystem, Integer inEmailList, Integer inTimesheetModule, Integer faultTrack) {
+<span class="nc" id="L38">        super(projectId, employeeId);</span>
+<span class="nc" id="L39">        this.bossInProjectId = bossInProjectId;</span>
+<span class="nc" id="L40">        this.role = role;</span>
+<span class="nc" id="L41">        this.accessGit = accessGit;</span>
+<span class="nc" id="L42">        this.accessFileSystem = accessFileSystem;</span>
+<span class="nc" id="L43">        this.inEmailList = inEmailList;</span>
+<span class="nc" id="L44">        this.inTimesheetModule = inTimesheetModule;</span>
+<span class="nc" id="L45">        this.faultTrack = faultTrack;</span>
+<span class="nc" id="L46">    }</span>
+
+    public ProjectMember(String projectId, String employeeId, String bossInProjectId, String role, Integer inTimesheetModule, boolean level){
+<span class="nc" id="L49">        super(projectId, employeeId);</span>
+<span class="nc" id="L50">        this.bossInProjectId = bossInProjectId;</span>
+<span class="nc" id="L51">        this.role = role;</span>
+<span class="nc" id="L52">        this.inTimesheetModule = inTimesheetModule;</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        this.accessGit = level ? &quot;W&quot; : &quot;R&quot;;</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        this.accessFileSystem = level ? &quot;W&quot; : &quot;R&quot;;</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        this.inEmailList = level ? 1 : 0;</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        this.faultTrack = level ? 1 : 0;</span>
+<span class="nc" id="L57">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

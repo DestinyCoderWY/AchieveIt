@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProjectMemberController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.controller</a> &gt; <span class="el_source">ProjectMemberController.java</span></div><h1>ProjectMemberController.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.controller;
+
+import com.ecnu.achieveit.constant.EmployeeTitle;
+import com.ecnu.achieveit.constant.ProjectRole;
+import com.ecnu.achieveit.model.Employee;
+import com.ecnu.achieveit.model.ProjectMember;
+import com.ecnu.achieveit.model.ProjectMemberKey;
+import com.ecnu.achieveit.service.EmployeeService;
+import com.ecnu.achieveit.service.ProjectMemberService;
+import com.ecnu.achieveit.util.LogUtil;
+import com.ecnu.achieveit.util.RestResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+@RestController
+<span class="fc" id="L22">public class ProjectMemberController {</span>
+
+    @Autowired
+    private ProjectMemberService projectMemberService;
+
+    @Autowired
+    private EmployeeService employeeService;
+
+    @GetMapping(&quot;/test/{role}&quot;)
+    public Object sendEmail(@PathVariable(&quot;role&quot;) String role ){
+<span class="nc" id="L32">        LogUtil.i(&quot;验证角色&quot; + role);</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">        if(ProjectRole.QA.in(role)</span>
+<span class="nc bnc" id="L34" title="All 2 branches missed.">                || ProjectRole.EPG.in(role)</span>
+<span class="nc bnc" id="L35" title="All 2 branches missed.">                || ProjectRole.MANAGER.in(role)){</span>
+<span class="nc" id="L36">            return RestResponse.noPermission(&quot;不能新增QA、EPG或者项目经理&quot;);</span>
+        }
+<span class="nc" id="L38">        LogUtil.i(&quot;成功&quot;);</span>
+<span class="nc" id="L39">        return RestResponse.success();</span>
+    }
+
+
+    @GetMapping(&quot;/member/{projectId}&quot;)
+    public Object list(@PathVariable(&quot;projectId&quot;) String projectId){
+<span class="nc" id="L45">        return RestResponse.success(projectMemberService.queryMemberList(projectId));</span>
+    }
+
+    @PostMapping(&quot;/member&quot;)
+    public Object add(@RequestAttribute(&quot;userId&quot;) String userId, ProjectMember projectMember){
+<span class="nc" id="L50">        ProjectMember user = projectMemberService.queryMemberByKey(new ProjectMemberKey(projectMember.getProjectId(),userId));</span>
+<span class="nc bnc" id="L51" title="All 4 branches missed.">        if(ObjectUtils.isEmpty(user) || !ProjectRole.MANAGER.in(user.getRole())){</span>
+<span class="nc" id="L52">            return RestResponse.noPermission(&quot;当前用户不是该项目的项目经理，无法导入项目成员&quot;);</span>
+        }
+
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        if(ProjectRole.isImportant(projectMember.getRole())){</span>
+
+<span class="nc" id="L57">            return RestResponse.noPermission(&quot;不能导入QA、EPG或者项目经理&quot;);</span>
+        }
+
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        if(projectMemberService.addProjectMember(projectMember)){</span>
+<span class="nc" id="L61">            return RestResponse.success();</span>
+        }
+<span class="nc" id="L63">        return RestResponse.fail();</span>
+    }
+
+    @PutMapping(&quot;/member&quot;)
+    public Object update(@RequestAttribute(&quot;userId&quot;) String userId, ProjectMember projectMember){
+<span class="nc" id="L68">        ProjectMember user = projectMemberService.queryMemberByKey(new ProjectMemberKey(projectMember.getProjectId(),userId));</span>
+<span class="nc bnc" id="L69" title="All 4 branches missed.">        if(ObjectUtils.isEmpty(user) || !ProjectRole.MANAGER.in(user.getRole())){</span>
+<span class="nc" id="L70">            return RestResponse.noPermission(&quot;当前用户不是该项目的项目经理，无法修改项目成员权限&quot;);</span>
+        }
+
+<span class="nc" id="L73">        ProjectMember oldMember = projectMemberService.queryMemberByKey(projectMember);</span>
+
+<span class="nc" id="L75">        if(ProjectRole.isImportant(projectMember.getRole())</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">                ^ ProjectRole.isImportant(oldMember.getRole())){</span>
+
+<span class="nc" id="L78">            return  RestResponse.noPermission(&quot;不能将重要角色转化（项目经理、EPG、QA）为普通角色或者将普通角色转化为重要角色&quot;);</span>
+        }
+
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        if(projectMemberService.modifyMemberPermission(projectMember)){</span>
+<span class="nc" id="L82">            return RestResponse.success();</span>
+        }
+
+<span class="nc" id="L85">        return RestResponse.fail();</span>
+    }
+
+    @DeleteMapping(&quot;/member&quot;)
+    public Object delete(@RequestAttribute(&quot;userId&quot;) String userId, ProjectMember projectMember){
+<span class="nc" id="L90">        LogUtil.i(&quot;userId: &quot; + userId);</span>
+<span class="nc" id="L91">        LogUtil.i(&quot;ProjectMember: &quot; + projectMember.toString());</span>
+<span class="nc" id="L92">        LogUtil.i(&quot;projectId: &quot; + projectMember.getProjectId());</span>
+<span class="nc" id="L93">        LogUtil.i(&quot;employeeId: &quot; + projectMember.getEmployeeId());</span>
+
+<span class="nc" id="L95">        ProjectMember user = projectMemberService.queryMemberByKey(new ProjectMemberKey(projectMember.getProjectId(),userId));</span>
+
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        if(ObjectUtils.isEmpty(user)){</span>
+<span class="nc" id="L98">            LogUtil.i(&quot;项目用户为空&quot;);</span>
+        }
+<span class="nc bnc" id="L100" title="All 4 branches missed.">        if(ObjectUtils.isEmpty(user) || !ProjectRole.MANAGER.in(user.getRole())){</span>
+<span class="nc" id="L101">            LogUtil.i(&quot;用户在项目中的角色为&quot; + user.getRole());</span>
+<span class="nc" id="L102">            return RestResponse.noPermission(&quot;当前用户不是该项目的项目经理，无法删除项目成员&quot;);</span>
+        }
+
+<span class="nc" id="L105">        ProjectMember oldMember = projectMemberService.queryMemberByKey(projectMember);</span>
+
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        if(ProjectRole.isImportant(oldMember.getRole())){</span>
+<span class="nc" id="L108">            return RestResponse.noPermission(&quot;不能删除QA、EPG或者项目经理&quot;);</span>
+        }
+
+<span class="nc bnc" id="L111" title="All 2 branches missed.">        if(projectMemberService.deleteMemberByKey(projectMember)){</span>
+<span class="nc" id="L112">            return RestResponse.success();</span>
+        }
+<span class="nc" id="L114">        return RestResponse.fail(&quot;删除失败&quot;);</span>
+    }
+
+    @GetMapping(&quot;/role&quot;)
+    public Object getRole(){
+<span class="nc" id="L119">        return RestResponse.success(Arrays.stream(ProjectRole.values()).map(ProjectRole::getRole).collect(Collectors.toList()));</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

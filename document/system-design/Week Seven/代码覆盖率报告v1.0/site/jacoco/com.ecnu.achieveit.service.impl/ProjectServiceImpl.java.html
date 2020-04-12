@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProjectServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.service.impl</a> &gt; <span class="el_source">ProjectServiceImpl.java</span></div><h1>ProjectServiceImpl.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.service.impl;
+
+import com.ecnu.achieveit.constant.ProjectState;
+import com.ecnu.achieveit.dao.AssetItemMapper;
+import com.ecnu.achieveit.dao.ProjectBasicInfoMapper;
+import com.ecnu.achieveit.model.AssetItem;
+import com.ecnu.achieveit.model.ProjectBasicInfo;
+import com.ecnu.achieveit.model.ProjectId;
+import com.ecnu.achieveit.service.ProjectService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+<span class="fc" id="L16">public class ProjectServiceImpl implements ProjectService {</span>
+
+    @Autowired(required = false)
+    private ProjectBasicInfoMapper projectBasicInfoMapper;
+
+    @Autowired(required = false)
+    private AssetItemMapper assetItemMapper;
+
+    @Override
+    public boolean addProject(ProjectBasicInfo projectBasicInfo) {
+<span class="fc" id="L26">        Integer result = projectBasicInfoMapper.insertSelective(projectBasicInfo);</span>
+
+<span class="pc bpc" id="L28" title="1 of 2 branches missed.">        return !result.equals(0);</span>
+    }
+
+    @Override
+    public boolean updateProject(ProjectBasicInfo projectBasicInfo) {
+<span class="fc" id="L33">        Integer result = projectBasicInfoMapper.updateByPrimaryKeySelective(projectBasicInfo);</span>
+
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        return !result.equals(0);</span>
+    }
+
+    @Override
+    public boolean updateProjectState(ProjectBasicInfo projectBasicInfo,String projectState) {
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        if(!ProjectState.checkState(projectState)) return false;</span>
+<span class="fc" id="L41">        String projectId = projectBasicInfo.getProjectId();</span>
+<span class="fc" id="L42">        int result = projectBasicInfoMapper.updateStateById(projectId, projectState);</span>
+
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        return result!=0;</span>
+    }
+
+    @Override
+    public boolean updateProjectStateById(String projectId, String projectState) {
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        if(!ProjectState.checkState(projectState)) return false;</span>
+<span class="fc" id="L50">        int result = projectBasicInfoMapper.updateStateById(projectId.toString(),projectState);</span>
+
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        return result!=0;</span>
+    }
+
+    @Override
+    public ProjectBasicInfo querryProjectByPrimaryKey(String projectId) {
+<span class="fc" id="L57">        ProjectBasicInfo result = projectBasicInfoMapper.selectByPrimaryKey(projectId);</span>
+<span class="fc" id="L58">        return result;</span>
+    }
+
+    @Override
+    public List&lt;ProjectBasicInfo&gt; queryProjectByEmployeeId(String employeeId) {
+<span class="fc" id="L63">        List&lt;ProjectBasicInfo&gt; result = projectBasicInfoMapper.selectByEmployeeId(employeeId);</span>
+
+<span class="fc" id="L65">        return result;</span>
+    }
+
+    @Override
+    public List&lt;ProjectBasicInfo&gt; queryProjectByClientId(String clientId) {
+<span class="fc" id="L70">        List&lt;ProjectBasicInfo&gt; result = projectBasicInfoMapper.selectByClientId(clientId);</span>
+
+<span class="fc" id="L72">        return result;</span>
+    }
+
+    @Override
+    public List&lt;ProjectBasicInfo&gt; queryProjectByState(String state) {
+<span class="fc" id="L77">        List&lt;ProjectBasicInfo&gt; result = projectBasicInfoMapper.selectByState(state);</span>
+
+<span class="fc" id="L79">        return result;</span>
+    }
+
+    @Override
+    public List&lt;ProjectBasicInfo&gt; queryProjectByBossId(String bossId) {
+<span class="fc" id="L84">        List&lt;ProjectBasicInfo&gt; result = projectBasicInfoMapper.selectByBossId(bossId);</span>
+
+<span class="fc" id="L86">        return  result;</span>
+    }
+
+    @Override
+    public List&lt;ProjectBasicInfo&gt; queryProjectByKeyWord(String keyWord,String employeeId){
+<span class="fc" id="L91">        List&lt;ProjectBasicInfo&gt; result = projectBasicInfoMapper.selectByKeyWord(keyWord,employeeId);</span>
+
+<span class="fc" id="L93">        return  result;</span>
+    }
+
+    @Override
+    public List&lt;AssetItem&gt; queryAssetItem() {
+<span class="fc" id="L98">        List&lt;AssetItem&gt; result = assetItemMapper.selectAll();</span>
+
+<span class="fc" id="L100">        return result;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

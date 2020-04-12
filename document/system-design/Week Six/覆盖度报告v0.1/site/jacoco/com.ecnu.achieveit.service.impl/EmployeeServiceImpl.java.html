@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmployeeServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.service.impl</a> &gt; <span class="el_source">EmployeeServiceImpl.java</span></div><h1>EmployeeServiceImpl.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.service.impl;
+
+import com.ecnu.achieveit.dao.EmployeeMapper;
+import com.ecnu.achieveit.model.Employee;
+import com.ecnu.achieveit.service.EmployeeService;
+import com.ecnu.achieveit.util.Validate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+
+
+import javax.annotation.Resource;
+import java.util.List;
+
+@Service
+<span class="fc" id="L16">public class EmployeeServiceImpl implements EmployeeService{</span>
+
+    @Autowired(required = false)
+    private EmployeeMapper employeeMapper;
+
+    @Override
+    public boolean deleteEmployeeById(String id) {
+
+<span class="nc" id="L24">        Integer result = employeeMapper.deleteByPrimaryKey(id);</span>
+
+<span class="nc bnc" id="L26" title="All 2 branches missed.">        return !result.equals(0);</span>
+    }
+
+    @Override
+    public boolean addEmployee(Employee employee) {
+
+<span class="nc" id="L32">        Integer result = employeeMapper.insertSelective(employee);</span>
+
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        return !result.equals(0);</span>
+    }
+
+    @Override
+    public boolean updateEmployee(Employee employee) {
+
+<span class="nc" id="L40">        Integer result = employeeMapper.updateByPrimaryKey(employee);</span>
+
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        return !result.equals(0);</span>
+    }
+
+    @Override
+    public List&lt;Employee&gt; queryEmployees() {
+
+<span class="nc" id="L48">        return employeeMapper.selectEmployeeList();</span>
+    }
+
+    @Override
+    public Employee queryEmployeeById(String id) {
+
+<span class="nc" id="L54">        return employeeMapper.selectByPrimaryKey(id);</span>
+    }
+
+    @Override
+    public List&lt;Employee&gt; queryBasicEmployees() {
+<span class="nc" id="L59">        return employeeMapper.selectBasicEmployeeList();</span>
+    }
+
+    @Override
+    public Employee queryBasicEmployeeById(String id) {
+<span class="fc" id="L64">        return employeeMapper.selectBasicByPrimaryKey(id);</span>
+    }
+
+    @Override
+    public Employee queryBasicEmployeeByEmail(String email) {
+<span class="nc" id="L69">        return employeeMapper.selectBasicByEmail(email);</span>
+    }
+
+    @Override
+    public boolean checkTitle(String userId, String title) {
+<span class="fc" id="L74">        Employee employee = queryBasicEmployeeById(userId);</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">        if(employee == null){</span>
+<span class="nc" id="L76">            return false;</span>
+        }
+<span class="fc" id="L78">        return title.equals(employee.getTitle());</span>
+    }
+
+    @Override
+    public Employee queryBasicEmployeeByIdOrEmail(String idOrEmail) {
+        Employee employee;
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        if(Validate.isEmail(idOrEmail)){</span>
+<span class="nc" id="L85">            employee = queryBasicEmployeeByEmail(idOrEmail);</span>
+        }else{
+<span class="nc" id="L87">            employee = queryBasicEmployeeById(idOrEmail);</span>
+        }
+<span class="nc" id="L89">        return employee;</span>
+    }
+
+    @Override
+    public List&lt;Employee&gt; queryBasicEmployeeGroup(String titleId) {
+<span class="nc" id="L94">        return employeeMapper.selectBasicEmployeeListByTitleId(titleId);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

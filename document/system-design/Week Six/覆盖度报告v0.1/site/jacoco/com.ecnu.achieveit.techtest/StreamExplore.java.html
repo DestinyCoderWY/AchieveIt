@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StreamExplore.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.techtest</a> &gt; <span class="el_source">StreamExplore.java</span></div><h1>StreamExplore.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.techtest;
+
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.ecnu.achieveit.constant.ConstantUtil;
+import com.ecnu.achieveit.model.Employee;
+import com.ecnu.achieveit.modelview.FunctionItem;
+import com.ecnu.achieveit.modelview.FunctionView;
+import com.ecnu.achieveit.util.LogUtil;
+import netscape.javascript.JSObject;
+
+import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.lang.Math.pow;
+
+
+<span class="nc" id="L22">public class StreamExplore implements Supplier&lt;People&gt; {</span>
+
+<span class="nc" id="L24">    private Random random = new Random(System.currentTimeMillis());</span>
+
+    @Override
+    public People get(){
+<span class="nc" id="L28">        String name = RandomUtil.generateStr(5);</span>
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        String gender = random.nextBoolean() ? &quot;male&quot; : &quot;female&quot;;</span>
+<span class="nc" id="L30">        Integer age =random.nextInt(100);</span>
+<span class="nc" id="L31">        return new People(name, gender, age);</span>
+    }
+
+    /*public static String group(People p){
+        if(p == null){
+            return &quot;不存在&quot;;
+        }else if(p.getAge() &lt; 8){
+            return &quot;儿童&quot;;
+        }else if(p.getAge() &lt; 18){
+            return &quot;未成年&quot;;
+        }else if(p.getAge() &lt; 40){
+            return &quot;青年&quot;;
+        }else if(p.getAge() &lt; 60){
+            return &quot;中年&quot;;
+        }else{
+            return &quot;老年&quot;;
+        }
+    }*/
+
+    public static void main(String[] args){
+
+
+<span class="nc" id="L53">        FunctionView functionView = new FunctionView();</span>
+
+<span class="nc" id="L55">        functionView.setProjectId(&quot;2019-dfs3-M-09&quot;);</span>
+<span class="nc" id="L56">        functionView.setFunctions(new ArrayList&lt;&gt;());</span>
+
+<span class="nc" id="L58">        FunctionItem item1 = new FunctionItem();</span>
+
+<span class="nc" id="L60">        item1.setPrimaryFunction(&quot;中文&quot;);</span>
+<span class="nc" id="L61">        List&lt;String&gt; secondaryFunction = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L62">        secondaryFunction.add(&quot;s1&quot;);</span>
+<span class="nc" id="L63">        secondaryFunction.add(&quot;s2&quot;);</span>
+<span class="nc" id="L64">        item1.setSecondaryFunction(secondaryFunction);</span>
+
+<span class="nc" id="L66">        FunctionItem item2 = new FunctionItem();</span>
+
+<span class="nc" id="L68">        item2.setPrimaryFunction(&quot;who cares&quot;);</span>
+<span class="nc" id="L69">        List&lt;String&gt; secondaryFunction2 = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L70">        secondaryFunction2.add(&quot;s3&quot;);</span>
+<span class="nc" id="L71">        secondaryFunction2.add(&quot;s4&quot;);</span>
+<span class="nc" id="L72">        item2.setSecondaryFunction(secondaryFunction2);</span>
+
+<span class="nc" id="L74">        functionView.getFunctions().add(item1);</span>
+<span class="nc" id="L75">        functionView.getFunctions().add(item2);</span>
+
+<span class="nc" id="L77">        LogUtil.i(JSON.toJSON(functionView).toString());</span>
+
+        /*Map&lt;String, List&lt;People&gt;&gt; peopleGroups0 = Stream.generate(new StreamExplore())
+                .limit(20)
+                .collect(Collectors.groupingBy(People::getGender));*/
+
+        /*Map&lt;String, List&lt;People&gt;&gt; peopleGroups = Stream.generate(new StreamExplore())
+                .limit(20)
+                .collect(Collectors.groupingBy(p -&gt; {
+                    if(p == null){
+                        return &quot;0&quot;;
+                    }else if(p.getAge() &lt; 8){
+                        return &quot;1&quot;;
+                    }else if(p.getAge() &lt; 18){
+                        return &quot;2&quot;;
+                    }else if(p.getAge() &lt; 40){
+                        return &quot;3&quot;;
+                    }else if(p.getAge() &lt; 60){
+                        return &quot;4&quot;;
+                    }else{
+                        return &quot;5&quot;;
+                    }
+                }));
+        for(Map.Entry&lt;String, List&lt;People&gt;&gt; entry : peopleGroups.entrySet()){
+            System.out.println(entry.getKey() + &quot;: &quot; + entry.getValue().size());
+            System.out.println(&quot;Detials: &quot; + entry.getValue().toString());
+        }*/
+
+
+        /*int countSsr = 0;
+        int total = 10000000;
+        StreamExplore streamExplore = new StreamExplore();
+        int noSsrTime = 0;
+        int countSsrQuent = 0;
+        for(int i = 0; i &lt; total; i++){
+            if(noSsrTime == 4){
+                countSsrQuent++;
+                noSsrTime = 0;
+            }else{
+                if(streamExplore.getSsr()){
+                    countSsr++;
+                    noSsrTime = 0;
+                }else{
+                    noSsrTime++;
+                }
+            }
+
+        }
+
+        System.out.println(&quot;抽取&quot; + total + &quot;次， 共抽到完整ssr&quot; + countSsr + &quot;个, ssr碎片&quot; + countSsrQuent +&quot;个。&quot;);
+        System.out.println(&quot;共计获得ssr&quot; + (countSsr+countSsrQuent/4.0) + &quot;个。&quot;);
+        System.out.println(&quot;期望为: &quot; + total/(countSsr+countSsrQuent/4.0));
+*/
+
+       /* int count = 0;
+        int object = 1000000;
+        int totalCount = 0;
+
+        StreamExplore streamExplore = new StreamExplore();
+        while (count &lt; object){
+            int runCount = 0;
+            int noSsrTime = 0;
+            boolean ssr = false;
+            //Random random = new Random(System.currentTimeMillis());
+            while (!ssr){
+                if(noSsrTime == 4){
+                    noSsrTime = 0;
+                }else{
+                    ssr = streamExplore.getSsr();
+                }
+                runCount++;
+                if(runCount == 20){
+                    ssr = true;
+                }
+            }
+            totalCount += runCount;
+            count++;
+        }
+        System.out.println(&quot;期望为:&quot; + totalCount*1.0/object);*/
+
+      /* double e = 0.0;
+
+       for(int i = 1; i &lt;= 20; i++){
+           if(i%5 != 0){
+               e += i*pow(0.95,i-(i/5+1))*0.05;
+           }else if(i==20){
+               e += i*pow(0.95,16);
+           }
+       }
+       System.out.println(e);*/
+
+        /*JSONObject jsonObject = new JSONObject();
+        jsonObject.put(&quot;ids&quot;,ConstantUtil.newProjectIds);
+        System.out.println(jsonObject.toJSONString());*/
+
+        /*Employee employee1 = new Employee();
+        employee1.setEmployeeId(&quot;sss&quot;);
+        employee1.setEmail(&quot;112@aefa&quot;);
+        Employee employee2 = new Employee();
+        employee2.setEmployeeId(&quot;aas2&quot;);
+        employee2.setEmail(&quot;321@adfsf&quot;);
+        List&lt;Employee&gt; employees = new ArrayList&lt;&gt;();
+        employees.add(employee1);
+        employees.add(employee2);
+        String to = employees.stream().map(Employee::getEmail).reduce((s1, s2) -&gt; s1 + &quot;,&quot; + s2).get();
+        System.out.println(to);*/
+
+        /*String to = &quot;asbav@dnbjnf&quot;;
+        String[] tos = to.split(&quot;,&quot;);
+        for(String str:tos){
+            System.out.println(str);
+        }*/
+<span class="nc" id="L189">    }</span>
+
+    public boolean getSsr(){
+<span class="nc bnc" id="L192" title="All 2 branches missed.">        return random.nextDouble() &lt;= 0.05 ? true : false;</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

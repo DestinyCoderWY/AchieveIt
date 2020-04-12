@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Timesheet.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.model</a> &gt; <span class="el_source">Timesheet.java</span></div><h1>Timesheet.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.model;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import org.apache.poi.ss.formula.functions.T;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.io.Serializable;
+import java.sql.Time;
+import java.util.Date;
+
+/**
+ * timesheet
+ * @author 
+ */
+<span class="fc" id="L15">public class Timesheet implements Serializable {</span>
+    private Integer timesheetId;
+
+    private String projectId;
+
+    private String employeeId;
+
+    private String primaryFunction;
+
+    private String secondaryFunction;
+
+    private String primaryActivity;
+
+    private String secondaryActivity;
+
+    @DateTimeFormat(pattern = &quot;yyyy-MM-dd&quot;)
+    @JsonFormat(pattern=&quot;yyyy-MM-dd&quot;, timezone=&quot;GMT+8&quot;)
+    private Date date;
+
+//    @DateTimeFormat(pattern = &quot;HH:mm:ss&quot;)
+
+    @JsonFormat(pattern=&quot;HH:mm:ss&quot;, timezone=&quot;GMT+8&quot;)
+    private Time startTime;
+
+//    @DateTimeFormat(pattern = &quot;HH:mm:ss&quot;)
+    @JsonFormat(pattern=&quot;HH:mm:ss&quot;, timezone=&quot;GMT+8&quot;)
+    private Time endTime;
+
+    /**
+     * 草稿、已提交、已确认、打回
+     */
+    private String state;
+
+    private static final long serialVersionUID = 1L;
+
+
+
+    public Integer getTimesheetId() {
+<span class="fc" id="L53">        return timesheetId;</span>
+    }
+
+    public void setTimesheetId(Integer timesheetId) {
+<span class="fc" id="L57">        this.timesheetId = timesheetId;</span>
+<span class="fc" id="L58">    }</span>
+
+    public String getProjectId() {
+<span class="fc" id="L61">        return projectId;</span>
+    }
+
+    public void setProjectId(String projectId) {
+<span class="fc" id="L65">        this.projectId = projectId;</span>
+<span class="fc" id="L66">    }</span>
+
+    public String getEmployeeId() {
+<span class="fc" id="L69">        return employeeId;</span>
+    }
+
+    public void setEmployeeId(String employeeId) {
+<span class="fc" id="L73">        this.employeeId = employeeId;</span>
+<span class="fc" id="L74">    }</span>
+
+    public String getPrimaryFunction() {
+<span class="fc" id="L77">        return primaryFunction;</span>
+    }
+
+    public void setPrimaryFunction(String primaryFunction) {
+<span class="fc" id="L81">        this.primaryFunction = primaryFunction;</span>
+<span class="fc" id="L82">    }</span>
+
+    public String getSecondaryFunction() {
+<span class="fc" id="L85">        return secondaryFunction;</span>
+    }
+
+    public void setSecondaryFunction(String secondaryFuntion) {
+<span class="fc" id="L89">        this.secondaryFunction = secondaryFuntion;</span>
+<span class="fc" id="L90">    }</span>
+
+    public String getPrimaryActivity() {
+<span class="fc" id="L93">        return primaryActivity;</span>
+    }
+
+    public void setPrimaryActivity(String primaryActivity) {
+<span class="fc" id="L97">        this.primaryActivity = primaryActivity;</span>
+<span class="fc" id="L98">    }</span>
+
+    public String getSecondaryActivity() {
+<span class="fc" id="L101">        return secondaryActivity;</span>
+    }
+
+    public void setSecondaryActivity(String secondaryActivity) {
+<span class="fc" id="L105">        this.secondaryActivity = secondaryActivity;</span>
+<span class="fc" id="L106">    }</span>
+
+    public Date getDate() {
+<span class="fc" id="L109">        return date;</span>
+    }
+
+    public void setDate(Date date) {
+<span class="fc" id="L113">        this.date = date;</span>
+<span class="fc" id="L114">    }</span>
+
+    public Date getStartTime() {
+<span class="fc" id="L117">        return startTime;</span>
+    }
+
+    public void setStartTime(Time startTime) {
+<span class="fc" id="L121">        this.startTime = startTime;</span>
+<span class="fc" id="L122">    }</span>
+
+    public Date getEndTime() {
+<span class="fc" id="L125">        return endTime;</span>
+    }
+
+    public void setEndTime(Time endTime) {
+<span class="fc" id="L129">        this.endTime = endTime;</span>
+<span class="fc" id="L130">    }</span>
+
+    public String getState() {
+<span class="fc" id="L133">        return state;</span>
+    }
+
+    public void setState(String state) {
+<span class="fc" id="L137">        this.state = state;</span>
+<span class="fc" id="L138">    }</span>
+
+    @Override
+    public boolean equals(Object that) {
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        if (this == that) {</span>
+<span class="nc" id="L143">            return true;</span>
+        }
+<span class="nc bnc" id="L145" title="All 2 branches missed.">        if (that == null) {</span>
+<span class="nc" id="L146">            return false;</span>
+        }
+<span class="nc bnc" id="L148" title="All 2 branches missed.">        if (getClass() != that.getClass()) {</span>
+<span class="nc" id="L149">            return false;</span>
+        }
+<span class="nc" id="L151">        Timesheet other = (Timesheet) that;</span>
+<span class="nc bnc" id="L152" title="All 6 branches missed.">        return (this.getTimesheetId() == null ? other.getTimesheetId() == null : this.getTimesheetId().equals(other.getTimesheetId()))</span>
+<span class="nc bnc" id="L153" title="All 6 branches missed.">            &amp;&amp; (this.getProjectId() == null ? other.getProjectId() == null : this.getProjectId().equals(other.getProjectId()))</span>
+<span class="nc bnc" id="L154" title="All 6 branches missed.">            &amp;&amp; (this.getEmployeeId() == null ? other.getEmployeeId() == null : this.getEmployeeId().equals(other.getEmployeeId()))</span>
+<span class="nc bnc" id="L155" title="All 6 branches missed.">            &amp;&amp; (this.getPrimaryFunction() == null ? other.getPrimaryFunction() == null : this.getPrimaryFunction().equals(other.getPrimaryFunction()))</span>
+<span class="nc bnc" id="L156" title="All 6 branches missed.">            &amp;&amp; (this.getSecondaryFunction() == null ? other.getSecondaryFunction() == null : this.getSecondaryFunction().equals(other.getSecondaryFunction()))</span>
+<span class="nc bnc" id="L157" title="All 6 branches missed.">            &amp;&amp; (this.getPrimaryActivity() == null ? other.getPrimaryActivity() == null : this.getPrimaryActivity().equals(other.getPrimaryActivity()))</span>
+<span class="nc bnc" id="L158" title="All 6 branches missed.">            &amp;&amp; (this.getSecondaryActivity() == null ? other.getSecondaryActivity() == null : this.getSecondaryActivity().equals(other.getSecondaryActivity()))</span>
+<span class="nc bnc" id="L159" title="All 6 branches missed.">            &amp;&amp; (this.getDate() == null ? other.getDate() == null : this.getDate().equals(other.getDate()))</span>
+<span class="nc bnc" id="L160" title="All 6 branches missed.">            &amp;&amp; (this.getStartTime() == null ? other.getStartTime() == null : this.getStartTime().equals(other.getStartTime()))</span>
+<span class="nc bnc" id="L161" title="All 6 branches missed.">            &amp;&amp; (this.getEndTime() == null ? other.getEndTime() == null : this.getEndTime().equals(other.getEndTime()))</span>
+<span class="nc bnc" id="L162" title="All 6 branches missed.">            &amp;&amp; (this.getState() == null ? other.getState() == null : this.getState().equals(other.getState()));</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L167">        final int prime = 31;</span>
+<span class="fc" id="L168">        int result = 1;</span>
+<span class="fc bfc" id="L169" title="All 2 branches covered.">        result = prime * result + ((getTimesheetId() == null) ? 0 : getTimesheetId().hashCode());</span>
+<span class="pc bpc" id="L170" title="1 of 2 branches missed.">        result = prime * result + ((getProjectId() == null) ? 0 : getProjectId().hashCode());</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">        result = prime * result + ((getEmployeeId() == null) ? 0 : getEmployeeId().hashCode());</span>
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">        result = prime * result + ((getPrimaryFunction() == null) ? 0 : getPrimaryFunction().hashCode());</span>
+<span class="pc bpc" id="L173" title="1 of 2 branches missed.">        result = prime * result + ((getSecondaryFunction() == null) ? 0 : getSecondaryFunction().hashCode());</span>
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">        result = prime * result + ((getPrimaryActivity() == null) ? 0 : getPrimaryActivity().hashCode());</span>
+<span class="pc bpc" id="L175" title="1 of 2 branches missed.">        result = prime * result + ((getSecondaryActivity() == null) ? 0 : getSecondaryActivity().hashCode());</span>
+<span class="pc bpc" id="L176" title="1 of 2 branches missed.">        result = prime * result + ((getDate() == null) ? 0 : getDate().hashCode());</span>
+<span class="pc bpc" id="L177" title="1 of 2 branches missed.">        result = prime * result + ((getStartTime() == null) ? 0 : getStartTime().hashCode());</span>
+<span class="pc bpc" id="L178" title="1 of 2 branches missed.">        result = prime * result + ((getEndTime() == null) ? 0 : getEndTime().hashCode());</span>
+<span class="pc bpc" id="L179" title="1 of 2 branches missed.">        result = prime * result + ((getState() == null) ? 0 : getState().hashCode());</span>
+<span class="fc" id="L180">        return result;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L185">        StringBuilder sb = new StringBuilder();</span>
+<span class="fc" id="L186">        sb.append(getClass().getSimpleName());</span>
+<span class="fc" id="L187">        sb.append(&quot; [&quot;);</span>
+<span class="fc" id="L188">        sb.append(&quot;Hash = &quot;).append(hashCode());</span>
+<span class="fc" id="L189">        sb.append(&quot;, timesheetId=&quot;).append(timesheetId);</span>
+<span class="fc" id="L190">        sb.append(&quot;, projectId=&quot;).append(projectId);</span>
+<span class="fc" id="L191">        sb.append(&quot;, employeeId=&quot;).append(employeeId);</span>
+<span class="fc" id="L192">        sb.append(&quot;, primaryFunction=&quot;).append(primaryFunction);</span>
+<span class="fc" id="L193">        sb.append(&quot;, secondaryFuntion=&quot;).append(secondaryFunction);</span>
+<span class="fc" id="L194">        sb.append(&quot;, primaryActivity=&quot;).append(primaryActivity);</span>
+<span class="fc" id="L195">        sb.append(&quot;, secondaryActivity=&quot;).append(secondaryActivity);</span>
+<span class="fc" id="L196">        sb.append(&quot;, date=&quot;).append(date);</span>
+<span class="fc" id="L197">        sb.append(&quot;, startTime=&quot;).append(startTime);</span>
+<span class="fc" id="L198">        sb.append(&quot;, endTime=&quot;).append(endTime);</span>
+<span class="fc" id="L199">        sb.append(&quot;, state=&quot;).append(state);</span>
+<span class="fc" id="L200">        sb.append(&quot;, serialVersionUID=&quot;).append(serialVersionUID);</span>
+<span class="fc" id="L201">        sb.append(&quot;]&quot;);</span>
+<span class="fc" id="L202">        return sb.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NewProjectFlowServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.service.impl</a> &gt; <span class="el_source">NewProjectFlowServiceImpl.java</span></div><h1>NewProjectFlowServiceImpl.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.service.impl;
+
+import com.ecnu.achieveit.constant.EmployeeTitle;
+import com.ecnu.achieveit.constant.ProjectRole;
+import com.ecnu.achieveit.constant.ProjectState;
+import com.ecnu.achieveit.model.Employee;
+import com.ecnu.achieveit.model.ProjectBasicInfo;
+import com.ecnu.achieveit.model.ProjectMember;
+import com.ecnu.achieveit.modelview.ProjectBasicInfoView;
+import com.ecnu.achieveit.service.*;
+import com.ecnu.achieveit.util.LogUtil;
+import org.activiti.engine.RuntimeService;
+import org.activiti.engine.TaskService;
+import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Task;
+import org.activiti.engine.task.TaskQuery;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Service
+<span class="fc" id="L32">public class NewProjectFlowServiceImpl implements NewProjectFlowService {</span>
+
+    @Autowired
+    private RuntimeService runtimeService;
+
+    @Autowired
+    private TaskService taskService;
+
+    @Autowired
+    private ProjectService projectService;
+
+    @Autowired
+    private ProjectMemberService projectMemberService;
+
+    @Autowired
+    private EmployeeService employeeService;
+
+    @Autowired
+    private IMailService mailService;
+
+    @Autowired
+    private ProjectIdService projectIdService;
+
+    @Qualifier(&quot;templateEngine&quot;)
+    @Autowired
+    private TemplateEngine templateEngine;
+
+    @Override
+    public String startProcess() {
+<span class="nc" id="L61">        LogUtil.i(&quot;=============start process begining=========&quot;);</span>
+<span class="nc" id="L62">        ProcessInstance instance = runtimeService.startProcessInstanceByKey(&quot;create_project&quot;);</span>
+<span class="nc" id="L63">        LogUtil.i(&quot;=============start process ended=========&quot;);</span>
+<span class="nc" id="L64">        return instance.getId();</span>
+    }
+
+    @Override
+    public boolean createProject(String userId, ProjectBasicInfo projectBasicInfo) {
+
+        boolean insertResult;
+<span class="nc" id="L71">        projectBasicInfo.setState(ProjectState.APPLIED.getState());</span>
+<span class="nc" id="L72">        insertResult = projectService.addProject(projectBasicInfo);</span>
+<span class="nc" id="L73">        projectIdService.deleteProjectId(projectBasicInfo.getProjectId());</span>
+<span class="nc bnc" id="L74" title="All 4 branches missed.">        insertResult = insertResult &amp;&amp; projectMemberService.addProjectMember(projectBasicInfo.getProjectId(),userId, userId, ProjectRole.MANAGER.getRole());</span>
+
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        if(!insertResult){</span>
+<span class="nc" id="L77">            return false;</span>
+        }
+
+<span class="nc" id="L80">        String instanceId = startProcess();</span>
+<span class="nc" id="L81">        Task task = taskService.createTaskQuery().processInstanceId(instanceId).singleResult();</span>
+<span class="nc" id="L82">        task.setAssignee(userId);</span>
+<span class="nc" id="L83">        LogUtil.i(&quot;task assigned to &quot; + userId);</span>
+
+
+<span class="nc" id="L86">        Map&lt;String, Object&gt; variables= new HashMap&lt;&gt;();</span>
+<span class="nc" id="L87">        variables.put(&quot;managerId&quot;, userId);</span>
+<span class="nc" id="L88">        variables.put(&quot;project&quot;, projectBasicInfo);</span>
+<span class="nc" id="L89">        taskService.complete(task.getId(),variables);</span>
+
+<span class="nc" id="L91">        LogUtil.i(&quot;录入信息任务完成&quot;);</span>
+
+<span class="nc" id="L93">        sendApplieddEmailToBoss(projectBasicInfo.getProjectName(),userId);</span>
+
+<span class="nc" id="L95">        return true;</span>
+    }
+
+    @Override
+    public List&lt;ProjectBasicInfoView&gt; getAppliedProjects(String userId) {
+
+<span class="nc" id="L101">        LogUtil.i(&quot;开始查询当前用户的tasks&quot;);</span>
+<span class="nc" id="L102">        List&lt;ProjectBasicInfoView&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L103">        List&lt;Task&gt; tasks = taskService.createTaskQuery()</span>
+<span class="nc" id="L104">                .processDefinitionKey(&quot;create_project&quot;)</span>
+<span class="nc" id="L105">                .taskCandidateOrAssigned(userId)</span>
+<span class="nc" id="L106">                .orderByTaskCreateTime()</span>
+<span class="nc" id="L107">                .desc()</span>
+<span class="nc" id="L108">                .list();</span>
+
+<span class="nc bnc" id="L110" title="All 4 branches missed.">        if(tasks != null &amp;&amp; tasks.size() &gt; 0){</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">            for (Task task : tasks) {</span>
+<span class="nc" id="L112">                ProjectBasicInfo projectBasicInfo = (ProjectBasicInfo)taskService.getVariables(task.getId()).get(&quot;project&quot;);</span>
+<span class="nc" id="L113">                result.add(new ProjectBasicInfoView(task.getId(),projectBasicInfo));</span>
+<span class="nc" id="L114">                LogUtil.i(&quot;任务Id: &quot; + task.getId());</span>
+<span class="nc" id="L115">                LogUtil.i(&quot;项目信息: &quot; + projectBasicInfo);</span>
+<span class="nc" id="L116">            }</span>
+        }
+<span class="nc" id="L118">        LogUtil.i(&quot;任务查询完成&quot;);</span>
+
+<span class="nc" id="L120">        return result;</span>
+    }
+
+    @Override
+    public boolean approveProject(String taskId, String userId) {
+<span class="nc" id="L125">        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">        if(task == null){</span>
+<span class="nc" id="L127">            return false;</span>
+        }
+<span class="nc" id="L129">        task.setAssignee(userId);</span>
+
+<span class="nc" id="L131">        Map&lt;String, Object&gt; preVariables = taskService.getVariables(taskId);</span>
+<span class="nc" id="L132">        ProjectBasicInfo projectBasicInfo = (ProjectBasicInfo)preVariables.get(&quot;project&quot;);</span>
+<span class="nc" id="L133">        String managerId = (String)preVariables.get(&quot;managerId&quot;);</span>
+<span class="nc" id="L134">        projectBasicInfo.setProjectBossId(userId);</span>
+<span class="nc" id="L135">        projectBasicInfo.setState(ProjectState.APPROVED.getState());</span>
+<span class="nc" id="L136">        projectService.updateProject(projectBasicInfo);</span>
+
+<span class="nc" id="L138">        Map&lt;String, Object&gt; variables= new HashMap&lt;&gt;();</span>
+<span class="nc" id="L139">        variables.put(&quot;pass&quot;,1);</span>
+<span class="nc" id="L140">        taskService.complete(taskId,variables);</span>
+
+<span class="nc" id="L142">        LogUtil.i(&quot;完成任务，开始发邮件&quot;);</span>
+<span class="nc" id="L143">        sendApprovedEmail(managerId,projectBasicInfo);</span>
+
+<span class="nc" id="L145">        return true;</span>
+    }
+
+    @Override
+    public boolean disapproveProject(String taskId, String userId) {
+
+<span class="nc" id="L151">        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        if(task == null){</span>
+<span class="nc" id="L153">            return false;</span>
+        }
+<span class="nc" id="L155">        task.setAssignee(userId);</span>
+
+<span class="nc" id="L157">        Map&lt;String, Object&gt; preVariables = taskService.getVariables(taskId);</span>
+<span class="nc" id="L158">        ProjectBasicInfo projectBasicInfo = (ProjectBasicInfo)preVariables.get(&quot;project&quot;);</span>
+<span class="nc" id="L159">        String managerId = (String)preVariables.get(&quot;managerId&quot;);</span>
+<span class="nc" id="L160">        projectBasicInfo.setProjectBossId(userId);</span>
+<span class="nc" id="L161">        projectBasicInfo.setState(ProjectState.DISAPPROVED.getState());</span>
+<span class="nc" id="L162">        projectService.updateProject(projectBasicInfo);</span>
+
+<span class="nc" id="L164">        Map&lt;String, Object&gt; variables= new HashMap&lt;&gt;();</span>
+<span class="nc" id="L165">        variables.put(&quot;pass&quot;,0);</span>
+<span class="nc" id="L166">        taskService.complete(taskId,variables);</span>
+
+<span class="nc" id="L168">        sendDisapprovedEmail(managerId,projectBasicInfo);</span>
+
+<span class="nc" id="L170">        return true;</span>
+    }
+
+    @Override
+    public boolean sendApprovedEmail(String projectManagerId, ProjectBasicInfo projectBasicInfo) {
+
+<span class="nc" id="L176">        Employee manager = employeeService.queryBasicEmployeeById(projectManagerId);</span>
+<span class="nc" id="L177">        Employee boss = employeeService.queryBasicEmployeeById(projectBasicInfo.getProjectBossId());</span>
+
+        /*邮件通知配置管理员*/
+<span class="nc" id="L180">        List&lt;Employee&gt; orgConfigs = employeeService.queryBasicEmployeeGroup(EmployeeTitle.ORG_CONFIG.getTitle());</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">        if(!ObjectUtils.isEmpty(orgConfigs)){</span>
+<span class="nc" id="L182">            String to = orgConfigs.stream().map(Employee::getEmail).collect(Collectors.joining(&quot;,&quot;));</span>
+<span class="nc" id="L183">            LogUtil.i(&quot;即将发送邮件给&quot; + to);</span>
+<span class="nc" id="L184">            sendApprovedEmailToGroup(to, projectBasicInfo.getProjectName(),</span>
+<span class="nc" id="L185">                    EmployeeTitle.ORG_CONFIG.getTitleName(), boss.getEmployeeName(),</span>
+                    &quot;请登录AchieveIt系统为其建立配置库。&quot;);
+<span class="nc" id="L187">            LogUtil.i(&quot;已经向组织级配置管理员&quot; + to + &quot;发送邮件&quot;);</span>
+        }
+        /*邮件通知QA Leader*/
+<span class="nc" id="L190">        List&lt;Employee&gt; qaLeaders = employeeService.queryBasicEmployeeGroup(EmployeeTitle.QA_LEADER.getTitle());</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">        if(!ObjectUtils.isEmpty(qaLeaders)){</span>
+<span class="nc" id="L192">            String to = qaLeaders.stream().map(Employee::getEmail).collect(Collectors.joining(&quot;,&quot;));</span>
+<span class="nc" id="L193">            LogUtil.i(&quot;即将发送邮件给&quot; + to);</span>
+<span class="nc" id="L194">            sendApprovedEmailToGroup(to, projectBasicInfo.getProjectName(),</span>
+<span class="nc" id="L195">                    EmployeeTitle.QA_LEADER.getTitleName(), boss.getEmployeeName(),</span>
+                    &quot;请登录AchieveIt系统为其分配QA。&quot;);
+<span class="nc" id="L197">            LogUtil.i(&quot;已经向组QA经理&quot; + to + &quot;发送邮件&quot;);</span>
+        }
+        /*邮件通知EPG Leader*/
+<span class="nc" id="L200">        List&lt;Employee&gt; epgLeaders = employeeService.queryBasicEmployeeGroup(EmployeeTitle.EPG_LEADER.getTitle());</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">        if(!ObjectUtils.isEmpty(epgLeaders)){</span>
+<span class="nc" id="L202">            String to = epgLeaders.stream().map(Employee::getEmail).collect(Collectors.joining(&quot;,&quot;));</span>
+<span class="nc" id="L203">            LogUtil.i(&quot;即将发送邮件给&quot; + to);</span>
+<span class="nc" id="L204">            sendApprovedEmailToGroup(to, projectBasicInfo.getProjectName(),</span>
+<span class="nc" id="L205">                    EmployeeTitle.EPG_LEADER.getTitleName(), boss.getEmployeeName(),</span>
+                    &quot;请登录AchieveIt系统为其分配EPG。&quot;);
+<span class="nc" id="L207">            LogUtil.i(&quot;已经向EPG Leader&quot; + to + &quot;发送邮件&quot;);</span>
+        }
+<span class="nc" id="L209">        LogUtil.i(&quot;即将发送邮件给&quot; + manager.getEmail());</span>
+
+<span class="nc" id="L211">        sendApprovedEmailToGroup(manager.getEmail(),projectBasicInfo.getProjectName(),</span>
+<span class="nc" id="L212">                manager.getEmployeeName(),boss.getEmployeeName(),</span>
+                &quot;请登录AchieveIt系统查看详情。&quot;);
+<span class="nc" id="L214">        LogUtil.i(&quot;已经向项目经理&quot; + manager.getEmployeeName() + &quot;发送邮件&quot;);</span>
+
+<span class="nc" id="L216">        return true;</span>
+    }
+
+    @Override
+    public boolean sendDisapprovedEmail(String projectManagerId, ProjectBasicInfo projectBasicInfo) {
+<span class="nc" id="L221">        Employee manager = employeeService.queryBasicEmployeeById(projectManagerId);</span>
+<span class="nc" id="L222">        Employee boss = employeeService.queryBasicEmployeeById(projectBasicInfo.getProjectBossId());</span>
+        try {
+<span class="nc" id="L224">            Context context = new Context();</span>
+<span class="nc" id="L225">            context.setVariable(&quot;project_name&quot;, projectBasicInfo.getProjectName());</span>
+<span class="nc" id="L226">            context.setVariable(&quot;user&quot;, manager.getEmployeeName());</span>
+<span class="nc" id="L227">            context.setVariable(&quot;boss&quot;, boss.getEmployeeName());</span>
+<span class="nc" id="L228">            String emailContent = templateEngine.process(&quot;disapprove_project_notify&quot;, context);</span>
+
+<span class="nc" id="L230">            mailService.sendHtmlMail(manager.getEmail(), &quot;项目被驳回&quot;, emailContent);</span>
+<span class="nc" id="L231">            LogUtil.i(&quot;已经向项目经理&quot; + manager.getEmployeeName() + &quot;发送邮件&quot;);</span>
+
+<span class="nc" id="L233">        }catch (Exception ex){</span>
+<span class="nc" id="L234">            ex.printStackTrace();</span>
+<span class="nc" id="L235">            LogUtil.i(&quot;发送邮件给项目经理失败&quot;);</span>
+<span class="nc" id="L236">            return false;</span>
+<span class="nc" id="L237">        }</span>
+<span class="nc" id="L238">        return true;</span>
+    }
+
+    @Override
+    public boolean setProjectConfig(String taskId, String userId, ProjectBasicInfo projectBasicInfo) {
+<span class="nc" id="L243">        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">        if(task == null){</span>
+<span class="nc" id="L245">            return false;</span>
+        }
+<span class="nc" id="L247">        task.setAssignee(userId);</span>
+
+<span class="nc" id="L249">        String managerId = (String)taskService.getVariables(taskId).get(&quot;managerId&quot;);</span>
+<span class="nc" id="L250">        projectService.updateProject(projectBasicInfo);</span>
+<span class="nc" id="L251">        taskService.complete(taskId);</span>
+
+<span class="nc" id="L253">        sendConfigEmail(managerId,projectBasicInfo.getProjectName(),userId);</span>
+<span class="nc" id="L254">        return true;</span>
+    }
+
+    @Override
+    public boolean setProjectQaOrEpg(String taskId, String userId, String role, String... ids) {
+<span class="nc" id="L259">        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">        if(task == null){</span>
+<span class="nc" id="L261">            return false;</span>
+        }
+<span class="nc" id="L263">        task.setAssignee(userId);</span>
+
+<span class="nc" id="L265">        Map&lt;String, Object&gt; preVariables = taskService.getVariables(taskId);</span>
+<span class="nc" id="L266">        ProjectBasicInfo projectBasicInfo = (ProjectBasicInfo)preVariables.get(&quot;project&quot;);</span>
+<span class="nc" id="L267">        String managerId = (String)preVariables.get(&quot;managerId&quot;);</span>
+<span class="nc" id="L268">        boolean result = true;</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">        for(String id : ids){</span>
+<span class="nc bnc" id="L270" title="All 4 branches missed.">            result = result &amp;&amp; projectMemberService.addProjectMember(projectBasicInfo.getProjectId(), id, managerId, role);</span>
+        }
+<span class="nc bnc" id="L272" title="All 2 branches missed.">        if(result){</span>
+<span class="nc" id="L273">            sendSetMemberEmail(managerId,projectBasicInfo.getProjectName(),userId,role);</span>
+<span class="nc" id="L274">            taskService.complete(taskId);</span>
+        }
+<span class="nc" id="L276">        return result;</span>
+    }
+
+    @Override
+    public boolean sendConfigEmail(String projectManagerId, String projectName, String configId) {
+<span class="nc" id="L281">        Employee manager = employeeService.queryBasicEmployeeById(projectManagerId);</span>
+<span class="nc" id="L282">        Employee config = employeeService.queryBasicEmployeeById(configId);</span>
+        try {
+<span class="nc" id="L284">            Context context = new Context();</span>
+<span class="nc" id="L285">            context.setVariable(&quot;project_name&quot;, projectName);</span>
+<span class="nc" id="L286">            context.setVariable(&quot;user&quot;, manager.getEmployeeName());</span>
+<span class="nc" id="L287">            context.setVariable(&quot;org_config&quot;, config.getEmployeeName());</span>
+<span class="nc" id="L288">            String emailContent = templateEngine.process(&quot;configed_notify&quot;, context);</span>
+
+<span class="nc" id="L290">            mailService.sendHtmlMail(manager.getEmail(), &quot;新项目配置库已建立&quot;, emailContent);</span>
+<span class="nc" id="L291">            LogUtil.i(&quot;成功给项目经理&quot; + manager.getEmployeeName() + manager.getEmail() + &quot;发送邮件&quot;);</span>
+
+<span class="nc" id="L293">        }catch (Exception ex){</span>
+<span class="nc" id="L294">            ex.printStackTrace();</span>
+<span class="nc" id="L295">            LogUtil.i(&quot;发送邮件失败&quot;);</span>
+<span class="nc" id="L296">            return false;</span>
+<span class="nc" id="L297">        }</span>
+<span class="nc" id="L298">        return true;</span>
+    }
+
+    @Override
+    public boolean sendSetMemberEmail(String projectManagerId, String projectName, String leaderId, String employeeTitle) {
+<span class="nc" id="L303">        Employee manager = employeeService.queryBasicEmployeeById(projectManagerId);</span>
+<span class="nc" id="L304">        Employee leader = employeeService.queryBasicEmployeeById(leaderId);</span>
+        try {
+<span class="nc" id="L306">            Context context = new Context();</span>
+<span class="nc" id="L307">            context.setVariable(&quot;project_name&quot;, projectName);</span>
+<span class="nc" id="L308">            context.setVariable(&quot;user&quot;, manager.getEmployeeName());</span>
+<span class="nc" id="L309">            context.setVariable(&quot;title&quot;, employeeTitle);</span>
+<span class="nc" id="L310">            context.setVariable(&quot;leader_name&quot;, leader.getEmployeeName());</span>
+<span class="nc" id="L311">            String emailContent = templateEngine.process(&quot;set_member_notify&quot;, context);</span>
+
+<span class="nc" id="L313">            mailService.sendHtmlMail(manager.getEmail(), &quot;新的&quot; + employeeTitle + &quot;已添加到项目&quot;, emailContent);</span>
+<span class="nc" id="L314">            LogUtil.i(&quot;成功给项目经理&quot; + manager.getEmployeeName() + manager.getEmail() + &quot;发送邮件&quot;);</span>
+
+<span class="nc" id="L316">        }catch (Exception ex){</span>
+<span class="nc" id="L317">            ex.printStackTrace();</span>
+<span class="nc" id="L318">            LogUtil.i(&quot;发送邮件失败&quot;);</span>
+<span class="nc" id="L319">            return false;</span>
+<span class="nc" id="L320">        }</span>
+<span class="nc" id="L321">        return true;</span>
+    }
+
+
+    public boolean sendApprovedEmailToGroup(String to, String projectName, String userGroup, String bossName, String message){
+        try {
+<span class="nc" id="L327">            Context context = new Context();</span>
+<span class="nc" id="L328">            context.setVariable(&quot;project_name&quot;, projectName);</span>
+<span class="nc" id="L329">            context.setVariable(&quot;user&quot;, userGroup);</span>
+<span class="nc" id="L330">            context.setVariable(&quot;boss&quot;, bossName);</span>
+<span class="nc" id="L331">            context.setVariable(&quot;message&quot;, message);</span>
+<span class="nc" id="L332">            String emailContent = templateEngine.process(&quot;approve_project_notify&quot;, context);</span>
+
+<span class="nc" id="L334">            mailService.sendHtmlMail(to, &quot;项目审核通过&quot;, emailContent);</span>
+
+<span class="nc" id="L336">        }catch (Exception ex){</span>
+<span class="nc" id="L337">            ex.printStackTrace();</span>
+<span class="nc" id="L338">            LogUtil.i(&quot;发送邮件失败&quot;);</span>
+<span class="nc" id="L339">            return false;</span>
+<span class="nc" id="L340">        }</span>
+<span class="nc" id="L341">        return true;</span>
+    }
+
+    public boolean sendApplieddEmailToBoss(String projectName, String userId){
+
+<span class="nc" id="L346">        Employee manager = employeeService.queryBasicEmployeeById(userId);</span>
+<span class="nc" id="L347">        List&lt;Employee&gt; bosses = employeeService.queryBasicEmployeeGroup(EmployeeTitle.BOSS.getTitle());</span>
+
+<span class="nc bnc" id="L349" title="All 2 branches missed.">        if(!ObjectUtils.isEmpty(bosses)){</span>
+<span class="nc" id="L350">            String to = bosses.stream().map(Employee::getEmail).collect(Collectors.joining(&quot;,&quot;));</span>
+<span class="nc" id="L351">            LogUtil.i(&quot;即将发送邮件给&quot; + to);</span>
+            try {
+<span class="nc" id="L353">                Context context = new Context();</span>
+<span class="nc" id="L354">                context.setVariable(&quot;manager&quot;, manager.getEmployeeName());</span>
+<span class="nc" id="L355">                context.setVariable(&quot;project_name&quot;, projectName);</span>
+<span class="nc" id="L356">                String emailContent = templateEngine.process(&quot;new_project_applied_notify&quot;, context);</span>
+
+<span class="nc" id="L358">                mailService.sendHtmlMail(to, &quot;有新项目提交&quot;, emailContent);</span>
+
+<span class="nc" id="L360">            }catch (Exception ex){</span>
+<span class="nc" id="L361">                ex.printStackTrace();</span>
+<span class="nc" id="L362">                LogUtil.i(&quot;发送邮件失败&quot;);</span>
+<span class="nc" id="L363">                return false;</span>
+<span class="nc" id="L364">            }</span>
+<span class="nc" id="L365">            LogUtil.i(&quot;已经向Boss &quot; + to + &quot;发送邮件&quot;);</span>
+        }
+
+
+<span class="nc" id="L369">        return true;</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

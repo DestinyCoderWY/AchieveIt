@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReviewDefectServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.service.impl</a> &gt; <span class="el_source">ReviewDefectServiceImpl.java</span></div><h1>ReviewDefectServiceImpl.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.service.impl;
+
+import com.ecnu.achieveit.dao.ReviewDefectInfoMapper;
+import com.ecnu.achieveit.model.ReviewDefectInfo;
+import com.ecnu.achieveit.service.ReviewDefectService;
+import com.ecnu.achieveit.util.LogUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
+import java.util.List;
+
+@Service
+@Transactional(rollbackFor = Exception.class)
+<span class="fc" id="L16">public class ReviewDefectServiceImpl implements ReviewDefectService {</span>
+
+    @Autowired(required = false)
+    private ReviewDefectInfoMapper reviewDefectInfoMapper;
+
+    @Override
+    public boolean reportReviewDefect(ReviewDefectInfo reviewDefectInfo) {
+<span class="pc bpc" id="L23" title="1 of 2 branches missed.">        if(!reviewDefectInfo.valid()){</span>
+<span class="nc" id="L24">            return false;</span>
+        }
+
+<span class="fc" id="L27">        reviewDefectInfo.setDate(new Date());</span>
+<span class="fc" id="L28">        reviewDefectInfo.setState(0);</span>
+
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">        return reviewDefectInfoMapper.insertSelective(reviewDefectInfo) == 1;</span>
+    }
+
+    @Override
+    public boolean solveReviewDefect(ReviewDefectInfo reviewDefectInfo) {
+<span class="pc bpc" id="L35" title="2 of 4 branches missed.">        if(!reviewDefectInfo.valid() || reviewDefectInfo.getSolverId() == null){</span>
+<span class="nc" id="L36">            return false;</span>
+        }
+
+<span class="fc" id="L39">        reviewDefectInfo.setState(1);</span>
+
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">        return reviewDefectInfoMapper.updateByPrimaryKeySelective(reviewDefectInfo) == 1;</span>
+    }
+
+    @Override
+    public List&lt;ReviewDefectInfo&gt; queryListByProjectId(String projectId) {
+<span class="fc" id="L46">        return reviewDefectInfoMapper.selectListByProjectId(projectId);</span>
+    }
+
+    @Override
+    public List&lt;ReviewDefectInfo&gt; queryListByProviderId(String providerId) {
+<span class="fc" id="L51">        return reviewDefectInfoMapper.selectListByProviderId(providerId);</span>
+    }
+
+    @Override
+    public List&lt;ReviewDefectInfo&gt; queryListBySolverId(String solverId) {
+<span class="fc" id="L56">        return reviewDefectInfoMapper.selectListBySolverId(solverId);</span>
+    }
+
+    @Override
+    public List&lt;ReviewDefectInfo&gt; queryListByProjectIdAndState(String projectId, Integer state) {
+
+<span class="pc bpc" id="L62" title="3 of 6 branches missed.">        boolean stateIsValid = state != null &amp;&amp; (state.equals(0) || state.equals(1));</span>
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">        if(!stateIsValid){</span>
+<span class="nc" id="L64">            return null;</span>
+        }
+<span class="fc" id="L66">        return reviewDefectInfoMapper.selectListByProjectIdAndState(projectId,state);</span>
+    }
+
+    @Override
+    public List&lt;ReviewDefectInfo&gt; queryListByProjectIdAndType(String projectId, String type) {
+
+<span class="pc bpc" id="L72" title="4 of 6 branches missed.">        boolean typeIsValid = type != null &amp;&amp; (type.equals(&quot;defect&quot;) || type.equals(&quot;review&quot;));</span>
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">        if(!typeIsValid){</span>
+<span class="nc" id="L74">            return null;</span>
+        }
+<span class="fc" id="L76">        return reviewDefectInfoMapper.selectListByProjectIdAndType(projectId,type);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

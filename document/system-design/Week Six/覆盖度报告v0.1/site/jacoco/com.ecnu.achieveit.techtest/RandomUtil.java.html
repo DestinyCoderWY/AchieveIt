@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RandomUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.techtest</a> &gt; <span class="el_source">RandomUtil.java</span></div><h1>RandomUtil.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.techtest;
+
+import java.util.Random;
+
+/**
+ * 随机数、随即字符串工具
+ * Created by charlin on 2017/9/9.
+ */
+<span class="nc" id="L9">public class RandomUtil {</span>
+    public static final String allChar = &quot;0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;;
+    public static final String letterChar = &quot;abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;;
+    public static final String numberChar = &quot;0123456789&quot;;
+
+    /**
+     * 产生len长度的随机字符串
+     * @param len
+     * @return
+     */
+    public static String generateStr(int len){
+<span class="nc" id="L20">        StringBuffer sb = new StringBuffer();</span>
+<span class="nc" id="L21">        Random random = new Random();</span>
+<span class="nc bnc" id="L22" title="All 2 branches missed.">        for (int i = 0; i &lt;len ; i++) {</span>
+<span class="nc" id="L23">            sb.append(allChar.charAt(random.nextInt(allChar.length())));</span>
+        }
+<span class="nc" id="L25">        return  sb.toString();</span>
+    }
+
+    /**
+     * 返回一个定长的随机纯字母字符串(只包含大小写字母)
+     * @param length 随机字符串长度
+     * @return 随机字符串
+     */
+    public static String generateMixStr(int length) {
+<span class="nc" id="L34">        StringBuffer sb = new StringBuffer();</span>
+<span class="nc" id="L35">        Random random = new Random();</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        for (int i = 0; i &lt; length; i++) {</span>
+<span class="nc" id="L37">            sb.append(letterChar.charAt(random.nextInt(letterChar.length())));</span>
+        }
+<span class="nc" id="L39">        return sb.toString();</span>
+    }
+
+    /**
+     * 返回一个定长的随机纯大写字母字符串(只包含大小写字母)
+     * @param length 随机字符串长度
+     * @return 随机字符串
+     */
+    public static String generateLowerStr(int length) {
+<span class="nc" id="L48">        return generateMixStr(length).toLowerCase();</span>
+    }
+
+    /**
+     * 返回一个定长的随机纯小写字母字符串(只包含大小写字母)
+     * @param length 随机字符串长度
+     * @return 随机字符串
+     */
+    public static String generateUpperStr(int length) {
+<span class="nc" id="L57">        return generateMixStr(length).toUpperCase();</span>
+    }
+
+    /**
+     * 生成一个定长的纯0字符串
+     * @param length 字符串长度
+     * @return 纯0字符串
+     */
+    public static String generateZeroStr(int length) {
+<span class="nc" id="L66">        StringBuffer sb = new StringBuffer();</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        for (int i = 0; i &lt; length; i++) {</span>
+<span class="nc" id="L68">            sb.append('0');</span>
+        }
+<span class="nc" id="L70">        return sb.toString();</span>
+    }
+
+    /**
+     * 根据数字生成一个定长的字符串，长度不够前面补0
+     * @param num       数字
+     * @param fixdlenth 字符串长度
+     * @return 定长的字符串
+     */
+    public static String toFixedLengthStr(long num, int fixdlenth) {
+<span class="nc" id="L80">        StringBuffer sb = new StringBuffer();</span>
+<span class="nc" id="L81">        String strNum = String.valueOf(num);</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        if (fixdlenth - strNum.length() &gt;= 0) {</span>
+<span class="nc" id="L83">            sb.append(generateZeroStr(fixdlenth - strNum.length()));</span>
+        } else {
+<span class="nc" id="L85">            throw new RuntimeException(&quot;将数字&quot; + num + &quot;转化为长度为&quot; + fixdlenth + &quot;的字符串发生异常！&quot;);</span>
+        }
+<span class="nc" id="L87">        sb.append(strNum);</span>
+<span class="nc" id="L88">        return sb.toString();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

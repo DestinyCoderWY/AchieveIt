@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProjectRisk.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.model</a> &gt; <span class="el_source">ProjectRisk.java</span></div><h1>ProjectRisk.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.model;
+
+import lombok.*;
+
+import java.io.Serializable;
+
+/**
+ * This class corresponds to the database table project_risk
+ */
+@Getter
+<span class="nc" id="L11">@Setter</span>
+<span class="nc" id="L12">@ToString</span>
+<span class="nc" id="L13">@NoArgsConstructor</span>
+<span class="nc" id="L14">@AllArgsConstructor</span>
+public class ProjectRisk extends ProjectRiskKey implements Serializable {
+
+<span class="nc" id="L17">    private String type;</span>
+
+<span class="nc" id="L19">    private String description;</span>
+
+<span class="nc" id="L21">    private Integer riskLevel;</span>
+
+<span class="nc" id="L23">    private String influence;</span>
+
+<span class="nc" id="L25">    private String reactiveStrategy;</span>
+
+<span class="nc" id="L27">    private String riskState;</span>
+
+<span class="nc" id="L29">    private String riskOwnerId;</span>
+
+<span class="nc" id="L31">    private Long riskTrackFrequency;</span>
+
+    private static final long serialVersionUID = 1L;
+
+
+    public ProjectRisk(String projectId, String riskId, String type, String description, Integer riskLevel, String influence, String reactiveStrategy, String riskState, String riskOwnerId, Long riskTrackFrequency) {
+<span class="nc" id="L37">        super(projectId, riskId);</span>
+<span class="nc" id="L38">        this.type = type;</span>
+<span class="nc" id="L39">        this.description = description;</span>
+<span class="nc" id="L40">        this.riskLevel = riskLevel;</span>
+<span class="nc" id="L41">        this.influence = influence;</span>
+<span class="nc" id="L42">        this.reactiveStrategy = reactiveStrategy;</span>
+<span class="nc" id="L43">        this.riskState = riskState;</span>
+<span class="nc" id="L44">        this.riskOwnerId = riskOwnerId;</span>
+<span class="nc" id="L45">        this.riskTrackFrequency = riskTrackFrequency;</span>
+<span class="nc" id="L46">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

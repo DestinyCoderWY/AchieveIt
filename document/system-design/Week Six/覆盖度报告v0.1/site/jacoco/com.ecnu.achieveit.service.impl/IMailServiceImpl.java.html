@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IMailServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.service.impl</a> &gt; <span class="el_source">IMailServiceImpl.java</span></div><h1>IMailServiceImpl.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.service.impl;
+
+import com.ecnu.achieveit.service.IMailService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import java.io.File;
+
+@Service
+<span class="fc" id="L17">public class IMailServiceImpl implements IMailService {</span>
+
+    @Autowired
+    private JavaMailSender mailSender;
+
+    @Value(&quot;${spring.mail.from}&quot;)
+    private String from;
+
+    /**
+     * 发送文本邮件
+     *
+     * @param to
+     *          邮件接收方
+     * @param subject
+     *          邮件标题
+     * @param content
+     *          邮件内容
+     */
+    @Override
+    public void sendSimpleMail(String to, String subject, String content) {
+<span class="nc" id="L37">        SimpleMailMessage message = new SimpleMailMessage();</span>
+<span class="nc" id="L38">        message.setFrom(from);</span>
+<span class="nc" id="L39">        message.setTo(to);</span>
+<span class="nc" id="L40">        message.setSubject(subject);</span>
+<span class="nc" id="L41">        message.setText(content);</span>
+<span class="nc" id="L42">        mailSender.send(message);</span>
+<span class="nc" id="L43">    }</span>
+
+    /**
+     *
+     * @param to
+     *          邮件接收方
+     * @param subject
+     *          邮件标题
+     * @param content
+     *          邮件内容
+     * @param cc
+     *          抄送方
+     */
+    @Override
+    public void sendSimpleMail(String to, String subject, String content, String... cc) {
+<span class="nc" id="L58">        SimpleMailMessage message = new SimpleMailMessage();</span>
+<span class="nc" id="L59">        message.setFrom(from);</span>
+<span class="nc" id="L60">        message.setTo(to);</span>
+<span class="nc" id="L61">        message.setCc(cc);</span>
+<span class="nc" id="L62">        message.setSubject(subject);</span>
+<span class="nc" id="L63">        message.setText(content);</span>
+<span class="nc" id="L64">        mailSender.send(message);</span>
+<span class="nc" id="L65">    }</span>
+
+    /**
+     * 发送 HTML 邮件
+     *
+     * @param to
+     * @param subject
+     * @param content
+     */
+    @Override
+    public void sendHtmlMail(String to, String subject, String content) throws MessagingException {
+<span class="nc" id="L76">        MimeMessage message = mailSender.createMimeMessage();</span>
+
+<span class="nc" id="L78">        String[] tos = to.split(&quot;,&quot;);</span>
+
+        // true 表示需要创建一个multipart message
+<span class="nc" id="L81">        MimeMessageHelper helper = new MimeMessageHelper(message, true);</span>
+<span class="nc" id="L82">        helper.setFrom(from);</span>
+<span class="nc" id="L83">        helper.setTo(tos);</span>
+<span class="nc" id="L84">        helper.setSubject(subject);</span>
+<span class="nc" id="L85">        helper.setText(content, true);</span>
+
+<span class="nc" id="L87">        mailSender.send(message);</span>
+<span class="nc" id="L88">    }</span>
+
+    @Override
+    public void sendHtmlMail(String to, String subject, String content, String... cc) throws MessagingException {
+<span class="nc" id="L92">        MimeMessage message = mailSender.createMimeMessage();</span>
+
+<span class="nc" id="L94">        String[] tos = to.split(&quot;,&quot;);</span>
+
+        // true 表示需要创建一个multipart message
+<span class="nc" id="L97">        MimeMessageHelper helper = new MimeMessageHelper(message, true);</span>
+<span class="nc" id="L98">        helper.setFrom(from);</span>
+<span class="nc" id="L99">        helper.setTo(tos);</span>
+<span class="nc" id="L100">        helper.setCc(cc);</span>
+<span class="nc" id="L101">        helper.setSubject(subject);</span>
+<span class="nc" id="L102">        helper.setText(content, true);</span>
+
+<span class="nc" id="L104">        mailSender.send(message);</span>
+<span class="nc" id="L105">    }</span>
+
+    /**
+     * 发送带附件的邮件
+     *
+     * @param to
+     * @param subject
+     * @param content
+     * @param filePath
+     */
+    @Override
+    public void sendAttachmentsMail(String to, String subject, String content, String filePath) throws MessagingException {
+<span class="nc" id="L117">        MimeMessage message = mailSender.createMimeMessage();</span>
+
+<span class="nc" id="L119">        MimeMessageHelper helper = new MimeMessageHelper(message, true);</span>
+<span class="nc" id="L120">        helper.setFrom(from);</span>
+<span class="nc" id="L121">        helper.setTo(to);</span>
+<span class="nc" id="L122">        helper.setSubject(subject);</span>
+<span class="nc" id="L123">        helper.setText(content, true);</span>
+
+<span class="nc" id="L125">        FileSystemResource file = new FileSystemResource(new File(filePath));</span>
+        // 截取附件名
+<span class="nc" id="L127">        String fileName = filePath.substring(filePath.lastIndexOf(&quot;/&quot;) + 1);</span>
+<span class="nc" id="L128">        helper.addAttachment(fileName, file);</span>
+
+<span class="nc" id="L130">        mailSender.send(message);</span>
+<span class="nc" id="L131">    }</span>
+
+    @Override
+    public void sendAttachmentsMail(String to, String subject, String content, String filePath, String... cc) throws MessagingException {
+
+<span class="nc" id="L136">        MimeMessage message = mailSender.createMimeMessage();</span>
+
+<span class="nc" id="L138">        MimeMessageHelper helper = new MimeMessageHelper(message, true);</span>
+<span class="nc" id="L139">        helper.setFrom(from);</span>
+<span class="nc" id="L140">        helper.setTo(to);</span>
+<span class="nc" id="L141">        helper.setCc(cc);</span>
+<span class="nc" id="L142">        helper.setSubject(subject);</span>
+<span class="nc" id="L143">        helper.setText(content, true);</span>
+
+<span class="nc" id="L145">        FileSystemResource file = new FileSystemResource(new File(filePath));</span>
+        // 截取附件名
+<span class="nc" id="L147">        String fileName = filePath.substring(filePath.lastIndexOf(&quot;/&quot;) + 1);</span>
+<span class="nc" id="L148">        helper.addAttachment(fileName, file);</span>
+
+<span class="nc" id="L150">        mailSender.send(message);</span>
+<span class="nc" id="L151">    }</span>
+
+    /**
+     * 发送正文中有静态资源（图片）的邮件
+     *
+     * @param to
+     * @param subject
+     * @param content
+     * @param rscPath
+     * @param rscId
+     */
+    @Override
+    public void sendResourceMail(String to, String subject, String content, String rscPath, String rscId) throws MessagingException {
+<span class="nc" id="L164">        MimeMessage message = mailSender.createMimeMessage();</span>
+
+<span class="nc" id="L166">        MimeMessageHelper helper = new MimeMessageHelper(message, true);</span>
+<span class="nc" id="L167">        helper.setFrom(from);</span>
+<span class="nc" id="L168">        helper.setTo(to);</span>
+<span class="nc" id="L169">        helper.setSubject(subject);</span>
+<span class="nc" id="L170">        helper.setText(content, true);</span>
+
+<span class="nc" id="L172">        FileSystemResource res = new FileSystemResource(new File(rscPath));</span>
+<span class="nc" id="L173">        helper.addInline(rscId, res);</span>
+
+<span class="nc" id="L175">        mailSender.send(message);</span>
+<span class="nc" id="L176">    }</span>
+
+    @Override
+    public void sendResourceMail(String to, String subject, String content, String rscPath, String rscId, String... cc) throws MessagingException {
+
+<span class="nc" id="L181">        MimeMessage message = mailSender.createMimeMessage();</span>
+
+<span class="nc" id="L183">        MimeMessageHelper helper = new MimeMessageHelper(message, true);</span>
+<span class="nc" id="L184">        helper.setFrom(from);</span>
+<span class="nc" id="L185">        helper.setTo(to);</span>
+<span class="nc" id="L186">        helper.setCc(cc);</span>
+<span class="nc" id="L187">        helper.setSubject(subject);</span>
+<span class="nc" id="L188">        helper.setText(content, true);</span>
+
+<span class="nc" id="L190">        FileSystemResource res = new FileSystemResource(new File(rscPath));</span>
+<span class="nc" id="L191">        helper.addInline(rscId, res);</span>
+
+<span class="nc" id="L193">        mailSender.send(message);</span>
+<span class="nc" id="L194">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

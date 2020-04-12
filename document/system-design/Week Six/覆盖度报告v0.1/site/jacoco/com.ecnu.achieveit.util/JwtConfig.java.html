@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.util</a> &gt; <span class="el_source">JwtConfig.java</span></div><h1>JwtConfig.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.util;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.Getter;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+
+@Component
+@Getter
+<span class="fc" id="L13">public class JwtConfig {</span>
+
+<span class="pc" id="L15">    private final String secret = &quot;iwqjhda8232bjgh432[cicada-smile]&quot;;</span>
+<span class="pc" id="L16">    private final long expire = 3600;</span>
+<span class="pc" id="L17">    private final String header = &quot;token&quot;;</span>
+
+
+    /**
+     * @description: 根据身份信息生成token
+     */
+    public String getToken (String identityId){
+<span class="nc" id="L24">        Date nowDate = new Date();</span>
+        //过期时间
+<span class="nc" id="L26">        Date expireDate = new Date(nowDate.getTime() + expire * 1000);</span>
+<span class="nc" id="L27">        return Jwts.builder()</span>
+<span class="nc" id="L28">                .setHeaderParam(&quot;typ&quot;, &quot;JWT&quot;)</span>
+<span class="nc" id="L29">                .setSubject(identityId)</span>
+<span class="nc" id="L30">                .setIssuedAt(nowDate)</span>
+<span class="nc" id="L31">                .setExpiration(expireDate)</span>
+<span class="nc" id="L32">                .signWith(SignatureAlgorithm.HS512, secret)</span>
+<span class="nc" id="L33">                .compact();</span>
+    }
+    /**
+     * @description: 获取token中的信息
+     */
+    public Claims getTokenClaim (String token) {
+        try {
+<span class="nc" id="L40">            return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();</span>
+<span class="nc" id="L41">        }catch (Exception e){</span>
+<span class="nc" id="L42">            LogUtil.i(e.getMessage());</span>
+<span class="nc" id="L43">            return null;</span>
+        }
+    }
+    /**
+     * @description: 检验token是否过期
+     */
+    public boolean isTokenExpired (Date expirationTime) {
+<span class="nc" id="L50">        return expirationTime.before(new Date());</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

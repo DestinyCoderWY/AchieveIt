@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProjectMemberServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.service.impl</a> &gt; <span class="el_source">ProjectMemberServiceImpl.java</span></div><h1>ProjectMemberServiceImpl.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.service.impl;
+
+import com.ecnu.achieveit.constant.EmployeeTitle;
+import com.ecnu.achieveit.constant.ProjectRole;
+import com.ecnu.achieveit.dao.ProjectMemberMapper;
+import com.ecnu.achieveit.model.Employee;
+import com.ecnu.achieveit.model.ProjectMember;
+import com.ecnu.achieveit.model.ProjectMemberKey;
+import com.ecnu.achieveit.service.ProjectMemberService;
+import com.ecnu.achieveit.util.LogUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+
+import java.util.List;
+
+@Service
+<span class="fc" id="L18">public class ProjectMemberServiceImpl implements ProjectMemberService {</span>
+
+    @Autowired(required = false)
+    private ProjectMemberMapper projectMemberMapper;
+
+    @Override
+    public boolean addProjectMember(ProjectMember projectMember) {
+
+<span class="nc bnc" id="L26" title="All 2 branches missed.">        if(projectMember.getBossInProjectId() == null){</span>
+<span class="nc" id="L27">            List&lt;ProjectMember&gt; managers = queryMemberByRole(projectMember.getProjectId(),ProjectRole.MANAGER.getRole());</span>
+<span class="nc bnc" id="L28" title="All 2 branches missed.">            if(ObjectUtils.isEmpty(managers)){</span>
+<span class="nc" id="L29">                return false;</span>
+            }
+<span class="nc" id="L31">            projectMember.setBossInProjectId(managers.get(0).getEmployeeId());</span>
+        }
+
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        if(updatePermissionToServer(projectMember)){</span>
+<span class="nc bnc" id="L35" title="All 2 branches missed.">            return projectMemberMapper.insertSelective(projectMember) == 1;</span>
+        }
+
+<span class="nc" id="L38">        return false;</span>
+    }
+
+    @Override
+    public boolean addProjectMember(String projectId, String userId, String bossInProjectId, String role) {
+<span class="nc" id="L43">        Integer inTimSheetModule = 1;</span>
+
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        if(role.equals(ProjectRole.EPG.getRole())){</span>
+<span class="nc" id="L46">            inTimSheetModule = 0;</span>
+        }
+<span class="nc" id="L48">        LogUtil.i(&quot;member create start&quot;);</span>
+<span class="nc" id="L49">        ProjectMember projectMember = new ProjectMember(projectId, userId, bossInProjectId, role, inTimSheetModule, false);</span>
+
+<span class="nc" id="L51">        LogUtil.i(&quot;member create end&quot;);</span>
+<span class="nc" id="L52">        return addProjectMember(projectMember);</span>
+    }
+
+    @Override
+    public boolean modifyMemberPermission(ProjectMember projectMember) {
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if(updatePermissionToServer(projectMember)){</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">            return projectMemberMapper.updateByPrimaryKeySelective(projectMember) == 1;</span>
+        }
+
+<span class="nc" id="L61">        return false;</span>
+    }
+
+    @Override
+    public List&lt;ProjectMember&gt; queryMemberList(String projectId) {
+<span class="nc" id="L66">        return projectMemberMapper.selectListByProjectId(projectId);</span>
+    }
+
+    @Override
+    public ProjectMember queryMemberByKey(ProjectMemberKey projectMemberKey) {
+<span class="fc" id="L71">        return projectMemberMapper.selectByPrimaryKey(projectMemberKey);</span>
+    }
+
+    @Override
+    public boolean deleteMemberByKey(ProjectMemberKey projectMemberKey) {
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        return projectMemberMapper.deleteByPrimaryKey(projectMemberKey) == 1;</span>
+    }
+
+    @Override
+    public List&lt;ProjectMember&gt; queryMemberByRole(String projectId, String role) {
+<span class="nc" id="L81">        return projectMemberMapper.selectListByRole(projectId, role);</span>
+    }
+
+    private boolean updatePermissionToServer(ProjectMember projectMember){
+<span class="nc" id="L85">        ProjectMember originalMember = projectMemberMapper.selectByPrimaryKey(projectMember);</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        if(originalMember != null){</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">            if(projectMember.getAccessGit() != null</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">                &amp;&amp; !projectMember.getAccessGit().equals(originalMember.getAccessGit())){</span>
+<span class="nc" id="L89">                callGitShell(projectMember.getProjectId(),projectMember.getEmployeeId(),&quot;W&quot;.equals(projectMember.getAccessGit()));</span>
+            }
+<span class="nc bnc" id="L91" title="All 2 branches missed.">            if(projectMember.getAccessFileSystem() != null</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">                &amp;&amp; !projectMember.getAccessFileSystem().equals(originalMember.getAccessFileSystem())){</span>
+<span class="nc" id="L93">                callFileSystemShell(projectMember.getProjectId(),projectMember.getEmployeeId(),&quot;W&quot;.equals(projectMember.getAccessFileSystem()));</span>
+            }
+<span class="nc bnc" id="L95" title="All 2 branches missed.">            if(projectMember.getInEmailList() != null</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">                &amp;&amp; !projectMember.getInEmailList().equals(originalMember.getInEmailList())){</span>
+<span class="nc" id="L97">                callEmailShell(projectMember.getProjectId(),projectMember.getEmployeeId(),projectMember.getInEmailList().equals(1));</span>
+            }
+        }
+
+<span class="nc" id="L101">        return true;</span>
+    }
+
+    private boolean callGitShell(String projectId, String userId, boolean permit){
+        //获取git地址，根据permit调用相应的shell
+<span class="nc" id="L106">        LogUtil.i(&quot;Git权限变更，已在Git更新权限&quot;);</span>
+<span class="nc" id="L107">        return true;</span>
+    }
+
+    private boolean callFileSystemShell(String projectId, String userId, boolean permit){
+        //获取file system地址，根据permit调用相应的shell
+<span class="nc" id="L112">        LogUtil.i(&quot;文件系统权限变更，已在文件系统服务器更新权限&quot;);</span>
+<span class="nc" id="L113">        return true;</span>
+    }
+
+    private boolean callEmailShell(String projectId, String userId, boolean permit){
+        //获取项目邮件列表服务器地址，根据permit和user email调用相应的shell
+<span class="nc" id="L118">        LogUtil.i(&quot;邮件列表权限变更，已在邮件服务器更新权限&quot;);</span>
+<span class="nc" id="L119">        return true;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

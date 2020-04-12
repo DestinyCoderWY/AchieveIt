@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProjectFunctionController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.controller</a> &gt; <span class="el_source">ProjectFunctionController.java</span></div><h1>ProjectFunctionController.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.controller;
+
+import ch.qos.logback.core.util.FileUtil;
+import com.ecnu.achieveit.constant.ProjectRole;
+import com.ecnu.achieveit.model.ProjectFunctionKey;
+import com.ecnu.achieveit.model.ProjectMember;
+import com.ecnu.achieveit.model.ProjectMemberKey;
+import com.ecnu.achieveit.modelview.FunctionItem;
+import com.ecnu.achieveit.modelview.FunctionView;
+import com.ecnu.achieveit.service.ExcelService;
+import com.ecnu.achieveit.service.ProjectFunctionService;
+import com.ecnu.achieveit.service.ProjectMemberService;
+import com.ecnu.achieveit.util.LogUtil;
+import com.ecnu.achieveit.util.RestResponse;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
+@RestController
+<span class="fc" id="L28">public class ProjectFunctionController {</span>
+
+    @Autowired
+    private ExcelService excelService;
+
+    @Autowired
+    private ProjectFunctionService projectFunctionService;
+
+    @Autowired
+    private ProjectMemberService projectMemberService;
+
+    @PostMapping(&quot;/upload/function&quot;)
+    public Object upload(MultipartFile file){
+
+<span class="fc" id="L42">        FunctionView functionView = excelService.readProjectFunction(file);</span>
+
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if(functionView == null){</span>
+<span class="nc" id="L45">            return RestResponse.fail();</span>
+        }
+<span class="fc" id="L47">        return RestResponse.success(functionView);</span>
+    }
+
+    @GetMapping(&quot;/download/function/{projectId}&quot;)
+    public void download(HttpServletResponse response,
+                         @PathVariable(&quot;projectId&quot;) String projectId,
+                         @RequestAttribute(&quot;userId&quot;)String userId){
+        try {
+<span class="nc" id="L55">            InputStream fis = Thread.currentThread().getContextClassLoader().getResourceAsStream(&quot;static/project_function_template.xlsx&quot;);</span>
+<span class="nc" id="L56">            XSSFWorkbook workbook = new XSSFWorkbook(fis);</span>
+
+<span class="nc" id="L58">            List&lt;ProjectFunctionKey&gt; functionKeys = projectFunctionService.queryProjectFunction(projectId);</span>
+<span class="nc" id="L59">            workbook = excelService.writeProjectFunction(workbook, functionKeys);</span>
+
+<span class="nc" id="L61">            response.setContentType(&quot;application/binary;charset=ISO8859-1&quot;);</span>
+<span class="nc" id="L62">            String fileName = java.net.URLEncoder.encode(&quot;项目功能列表&quot;, &quot;UTF-8&quot;);</span>
+<span class="nc" id="L63">            response.setHeader(&quot;Content-disposition&quot;, &quot;attachment; filename=&quot; + fileName + &quot;.xlsx&quot;);</span>
+<span class="nc" id="L64">            ServletOutputStream out = null;</span>
+<span class="nc" id="L65">            out = response.getOutputStream();</span>
+<span class="nc" id="L66">            workbook.write(out);</span>
+<span class="nc" id="L67">            out.flush();</span>
+<span class="nc" id="L68">            out.close();</span>
+<span class="nc" id="L69">        } catch (IOException e) {</span>
+<span class="nc" id="L70">            e.printStackTrace();</span>
+<span class="nc" id="L71">        } finally {</span>
+            //关闭文件输出流
+
+<span class="nc" id="L74">        }</span>
+<span class="nc" id="L75">        return;</span>
+    }
+
+    @GetMapping(&quot;/function/{projectId}&quot;)
+    public Object get(@PathVariable(&quot;projectId&quot;) String projectId){
+
+<span class="fc" id="L81">        FunctionView functionView = projectFunctionService.queryProjectFunctionView(projectId);</span>
+
+<span class="fc" id="L83">        return RestResponse.success(functionView);</span>
+    }
+
+    @PostMapping(&quot;/function&quot;)
+    public Object add(@RequestBody FunctionView functionView, @RequestAttribute(&quot;userId&quot;)String userId){
+<span class="fc" id="L88">        ProjectMember user = projectMemberService.queryMemberByKey(new ProjectMemberKey(functionView.getProjectId(),userId));</span>
+<span class="pc bpc" id="L89" title="2 of 4 branches missed.">        if(ObjectUtils.isEmpty(user) || !ProjectRole.MANAGER.in(user.getRole())){</span>
+<span class="nc" id="L90">            return RestResponse.noPermission(&quot;当前用户不是该项目的项目经理，无法新增项目功能列表&quot;);</span>
+        }
+<span class="fc" id="L92">        LogUtil.i(&quot;注入的model： &quot; + functionView.toString());</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        if(projectFunctionService.addProjectFunction(functionView)){</span>
+<span class="fc" id="L94">            return RestResponse.success();</span>
+        }
+
+<span class="fc" id="L97">        return RestResponse.fail();</span>
+    }
+
+    @PutMapping(&quot;/function&quot;)
+    public Object update(@RequestBody FunctionView functionView, @RequestAttribute(&quot;userId&quot;)String userId){
+<span class="fc" id="L102">        ProjectMember user = projectMemberService.queryMemberByKey(new ProjectMemberKey(functionView.getProjectId(),userId));</span>
+<span class="pc bpc" id="L103" title="2 of 4 branches missed.">        if(ObjectUtils.isEmpty(user) || !ProjectRole.MANAGER.in(user.getRole())){</span>
+<span class="nc" id="L104">            return RestResponse.noPermission(&quot;当前用户不是该项目的项目经理，无法修改项目功能列表&quot;);</span>
+        }
+<span class="fc" id="L106">        LogUtil.i(&quot;注入的model： &quot; + functionView.toString());</span>
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">        if(projectFunctionService.updateProjectFunction(functionView)){</span>
+<span class="fc" id="L108">            return RestResponse.success();</span>
+        }
+
+<span class="nc" id="L111">        return RestResponse.fail();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

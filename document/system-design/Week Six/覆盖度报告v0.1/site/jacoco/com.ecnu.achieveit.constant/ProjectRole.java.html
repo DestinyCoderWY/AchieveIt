@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProjectRole.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.constant</a> &gt; <span class="el_source">ProjectRole.java</span></div><h1>ProjectRole.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.constant;
+
+import com.ecnu.achieveit.model.ProjectMember;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * @author 倪事通
+ */
+
+<span class="fc" id="L13">public enum ProjectRole {</span>
+
+    /**
+     * 项目成员在项目中的角色，区别于在人事系统中的身份
+     */
+<span class="fc" id="L18">    MANAGER(&quot;项目经理&quot;),</span>
+
+<span class="fc" id="L20">    DEVELOP_LEADER(&quot;开发Leader&quot;),</span>
+
+<span class="fc" id="L22">    TEST_LEADER(&quot;测试Leader&quot;),</span>
+
+<span class="fc" id="L24">    DEVELOPER(&quot;开发&quot;),</span>
+
+<span class="fc" id="L26">    TEST(&quot;测试&quot;),</span>
+
+<span class="fc" id="L28">    EPG(&quot;EPG&quot;),</span>
+
+<span class="fc" id="L30">    QA(&quot;QA&quot;),</span>
+
+<span class="fc" id="L32">    CONFIG(&quot;配置管理员&quot;);</span>
+
+    private String role;
+
+    public String getRole() {
+<span class="nc" id="L37">        return role;</span>
+    }
+
+    public void setRole(String role) {
+<span class="nc" id="L41">        this.role = role;</span>
+<span class="nc" id="L42">    }</span>
+
+<span class="fc" id="L44">    ProjectRole(String role) {</span>
+<span class="fc" id="L45">        this.role = role;</span>
+<span class="fc" id="L46">    }</span>
+
+    public static boolean valid(String role){
+<span class="nc" id="L49">        List&lt;String&gt; roles = Arrays.stream(role.split(&quot;,&quot;)).collect(Collectors.toList());</span>
+
+<span class="nc" id="L51">        long count = Arrays.stream(ProjectRole.values()).map(ProjectRole::getRole).filter(roles::contains).count();</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">        return count == roles.size();</span>
+    }
+
+    public boolean in(String role){
+<span class="fc" id="L56">        long count = Arrays.stream(role.split(&quot;,&quot;)).filter(r -&gt; this.role.equals(r)).count();</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        return count != 0;</span>
+    }
+
+    public static boolean isImportant(String role){
+<span class="nc" id="L61">        long count = Arrays.stream(role.split(&quot;,&quot;)).filter(r -&gt;</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">                r.equals(ProjectRole.MANAGER.getRole())</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">                    || r.equals(ProjectRole.EPG.getRole())</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">                    || r.equals(ProjectRole.QA.getRole())).count();</span>
+
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        return count != 0;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

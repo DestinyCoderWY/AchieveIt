@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProjectBasicInfoController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.controller</a> &gt; <span class="el_source">ProjectBasicInfoController.java</span></div><h1>ProjectBasicInfoController.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.controller;
+
+import com.ecnu.achieveit.constant.EmployeeTitle;
+import com.ecnu.achieveit.constant.ProjectState;
+import com.ecnu.achieveit.dao.AssetItemMapper;
+import com.ecnu.achieveit.model.AssetItem;
+import com.ecnu.achieveit.model.ProjectBasicInfo;
+import com.ecnu.achieveit.model.ProjectId;
+import com.ecnu.achieveit.service.EmployeeService;
+import com.ecnu.achieveit.service.ProjectIdService;
+import com.ecnu.achieveit.service.ProjectService;
+import com.ecnu.achieveit.util.RestResponse;
+import com.sun.org.apache.xpath.internal.operations.Bool;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.ecnu.achieveit.constant.ProjectState.ARCHIVED;
+
+@RestController
+<span class="fc" id="L23">public class ProjectBasicInfoController {</span>
+    @Autowired
+    private ProjectService projectService;
+    @Autowired
+    private EmployeeService employeeService;
+    @Autowired
+    private ProjectIdService projectIdService;
+
+    @GetMapping(&quot;/project_info/{project_id}&quot;)
+    public Object show(@PathVariable(&quot;project_id&quot;)String projectId){
+<span class="nc" id="L33">        ProjectBasicInfo result = projectService.querryProjectByPrimaryKey(projectId);</span>
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        if(result == null) return RestResponse.fail();</span>
+<span class="nc" id="L35">        return RestResponse.success(result);</span>
+    }
+
+    /**
+     *
+     * @param userId(Token里携带的)
+     * @return List&lt;ProjectBasicInfo&gt;
+     */
+    @GetMapping(&quot;/project_infos&quot;)
+    public Object list2(@RequestAttribute(&quot;userId&quot;)String userId){
+<span class="nc" id="L45">        List&lt;ProjectBasicInfo&gt; result = projectService.queryProjectByEmployeeId(userId);</span>
+
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        if(result == null) return RestResponse.fail(&quot;&quot;);</span>
+<span class="nc" id="L48">        else return RestResponse.success(result);</span>
+    }
+
+    @GetMapping(&quot;/project_infos/key_word/{key_word}&quot;)
+    public Object list3(@PathVariable(&quot;key_word&quot;)String keyWord,
+                        @RequestAttribute(&quot;userId&quot;)String employeeId){
+<span class="nc" id="L54">        List&lt;ProjectBasicInfo&gt; result = projectService.queryProjectByKeyWord(keyWord,employeeId);</span>
+
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        if(result== null) return RestResponse.fail();</span>
+<span class="nc" id="L57">        return RestResponse.success(result);</span>
+    }
+
+    @PutMapping(&quot;/state&quot;)
+    public  Object updateState(@RequestParam(&quot;projectId&quot;)String projectId,
+                               @RequestParam(&quot;state&quot;)String state,
+                               @RequestAttribute(&quot;userId&quot;)String userId){
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        if(!ProjectState.checkState(state))return RestResponse.fail(&quot;请检查目标状态是否合法&quot;);</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        if(state.equals(ARCHIVED.getState())){</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">            if(!employeeService.queryBasicEmployeeById(userId).getTitle().equals(EmployeeTitle.ORG_CONFIG.getTitleName()))</span>
+<span class="nc" id="L67">                return RestResponse.fail(&quot;该成员不是&quot; + EmployeeTitle.ORG_CONFIG.getTitleName() + &quot;，不能修改项目状态为已归档。&quot;);</span>
+        }
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        else if(!employeeService.queryBasicEmployeeById(userId).getTitle().equals(EmployeeTitle.MANAGER.getTitleName()))</span>
+<span class="nc" id="L70">            return RestResponse.fail(&quot;该成员不是&quot; + EmployeeTitle.MANAGER.getTitleName() + &quot;，不能修改项目状态。&quot;);</span>
+<span class="nc" id="L71">        projectService.updateProjectStateById(projectId,state);</span>
+<span class="nc" id="L72">        return RestResponse.success();</span>
+    }
+
+    @GetMapping(&quot;/state&quot;)
+    public Object list4(@RequestParam(&quot;state&quot;)String state,
+                        @RequestAttribute(&quot;userId&quot;)String userId){
+<span class="nc" id="L78">        List&lt;ProjectBasicInfo&gt; result = projectService.queryProjectByState(state);</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        if(result == null) return RestResponse.fail();</span>
+<span class="nc" id="L80">        return RestResponse.success(result);</span>
+    }
+
+    @GetMapping(&quot;/check_assets&quot;)
+    public  Object checkAssets(@RequestAttribute(&quot;userId&quot;) String userId){
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        if(!employeeService.queryBasicEmployeeById(userId).getTitle().equals(EmployeeTitle.ORG_CONFIG.getTitleName())){</span>
+<span class="nc" id="L86">            return RestResponse.fail(&quot;该成员不是&quot; + EmployeeTitle.ORG_CONFIG.getTitleName() + &quot;，没有权限&quot;);</span>
+        }
+
+<span class="nc" id="L89">        List&lt;AssetItem&gt; result = projectService.queryAssetItem();</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        if(result == null) return RestResponse.fail();</span>
+<span class="nc" id="L91">        return RestResponse.success(result);</span>
+    }
+
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

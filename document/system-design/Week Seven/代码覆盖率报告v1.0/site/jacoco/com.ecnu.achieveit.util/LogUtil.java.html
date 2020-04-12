@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LogUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.util</a> &gt; <span class="el_source">LogUtil.java</span></div><h1>LogUtil.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.util;
+
+/**
+ * 管理Log的工具类：可通过设置mCurrentLevel，控制Log输出级别。
+ * 项目上线时应将mCurrentLevel设置为LEVEL_NONE，禁止Log输出。
+ */
+<span class="nc" id="L7">public class LogUtil {</span>
+
+    public static final boolean LOG_VALID = true;
+    //日志输出级别NONE
+    public static final int LEVEL_NONE = 0;
+    //日志输出级别E
+    public static final int LEVEL_ERROR = 1;
+    //日志输出级别W
+    public static final int LEVEL_WARN = 2;
+    //日志输出级别I
+    public static final int LEVEL_INFO = 3;
+    //日志输出级别D
+    public static final int LEVEL_DEBUG = 4;
+    //日志输出级别V
+    public static final int LEVEL_VERBOSE = 5;
+
+    //日志输出时的Tag
+<span class="fc" id="L24">    private static String mTag = &quot;LogUtil&quot;;</span>
+    //当前日志输出级别（是否允许输出log）
+<span class="fc" id="L26">    private static int mCurrentLevel = LEVEL_VERBOSE;</span>
+
+    /**
+     * 以级别为 i 的形式输出LOG
+     */
+    public static void i(String msg) {
+<span class="pc bpc" id="L32" title="1 of 2 branches missed.">        if (mCurrentLevel &gt;= LEVEL_INFO) {</span>
+<span class="fc" id="L33">            Log.i(&quot;Information&quot;, msg);</span>
+        }
+<span class="fc" id="L35">    }</span>
+    /**
+     * 以级别为 i 的形式输出LOG
+     */
+    public static void i(String tag, String msg) {
+<span class="nc bnc" id="L40" title="All 2 branches missed.">        if (mCurrentLevel &gt;= LEVEL_INFO) {</span>
+<span class="nc" id="L41">            Log.i(tag, msg);</span>
+        }
+<span class="nc" id="L43">    }</span>
+
+<span class="nc" id="L45">    public static class Log{</span>
+
+        public static void i(String tag, String msg){
+            if(LOG_VALID) {
+<span class="fc" id="L49">                System.out.println(tag + &quot;: &quot; + msg);</span>
+            }
+<span class="fc" id="L51">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

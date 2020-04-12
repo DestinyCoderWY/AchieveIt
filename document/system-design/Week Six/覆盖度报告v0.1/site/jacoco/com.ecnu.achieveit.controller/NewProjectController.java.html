@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NewProjectController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.controller</a> &gt; <span class="el_source">NewProjectController.java</span></div><h1>NewProjectController.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.controller;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.ecnu.achieveit.constant.ConstantUtil;
+import com.ecnu.achieveit.constant.EmployeeTitle;
+import com.ecnu.achieveit.constant.ProjectRole;
+import com.ecnu.achieveit.constant.ProjectState;
+import com.ecnu.achieveit.model.Employee;
+import com.ecnu.achieveit.model.ProjectBasicInfo;
+import com.ecnu.achieveit.model.ProjectId;
+import com.ecnu.achieveit.modelview.ProjectBasicInfoView;
+import com.ecnu.achieveit.service.EmployeeService;
+import com.ecnu.achieveit.service.NewProjectFlowService;
+import com.ecnu.achieveit.service.ProjectIdService;
+import com.ecnu.achieveit.service.impl.IMailServiceImpl;
+import com.ecnu.achieveit.util.LogUtil;
+import com.ecnu.achieveit.util.RestResponse;
+import com.sun.org.apache.regexp.internal.RE;
+import org.activiti.engine.RuntimeService;
+import org.activiti.engine.TaskService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.*;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+<span class="fc" id="L35">public class NewProjectController {</span>
+
+    @Autowired
+    private EmployeeService employeeService;
+
+    @Autowired
+    private NewProjectFlowService newProjectFlowService;
+
+    @Autowired
+    private IMailServiceImpl mailService;
+
+    @Autowired
+    private ProjectIdService projectIdService;
+
+    @Qualifier(&quot;templateEngine&quot;)
+    @Autowired
+    private TemplateEngine templateEngine;
+
+
+    @PostMapping(&quot;/newproject&quot;)
+    public Object createNewProject(ProjectBasicInfo projectBasicInfo, @RequestAttribute(&quot;userId&quot;) String userId){
+
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if(!employeeService.checkTitle(userId,EmployeeTitle.MANAGER.getTitleName())){</span>
+<span class="nc" id="L58">            return RestResponse.fail(&quot;该用户不是项目经理!&quot;);</span>
+        }
+<span class="nc" id="L60">        projectBasicInfo.setState(ProjectState.APPLIED.getState());</span>
+
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if(newProjectFlowService.createProject(userId,projectBasicInfo)){</span>
+<span class="nc" id="L63">            return RestResponse.success(projectBasicInfo.getProjectId());</span>
+        }
+<span class="nc" id="L65">        return RestResponse.fail();</span>
+
+    }
+
+    @GetMapping(&quot;/newproject&quot;)
+    public Object getNewProjects(@RequestAttribute(&quot;userId&quot;) String userId){
+
+<span class="nc" id="L72">        List&lt;ProjectBasicInfoView&gt; projectBasicInfoViews =  newProjectFlowService.getAppliedProjects(userId);</span>
+
+<span class="nc" id="L74">        return RestResponse.success(projectBasicInfoViews);</span>
+    }
+
+    @PutMapping(&quot;/newproject&quot;)
+    public Object projectApproval(@RequestParam(&quot;taskId&quot;) String taskId, @RequestParam(&quot;approval&quot;) int approval,@RequestAttribute(&quot;userId&quot;) String userId){
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        if(!employeeService.queryBasicEmployeeById(userId).getTitle().equals(EmployeeTitle.BOSS.getTitleName())){</span>
+<span class="nc" id="L80">            return RestResponse.fail(&quot;该成员不是&quot; + EmployeeTitle.BOSS.getTitleName() + &quot;，不能审批项目。&quot;);</span>
+        }
+
+        boolean result;
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        if(approval == 1){</span>
+<span class="nc" id="L85">            result = newProjectFlowService.approveProject(taskId,userId);</span>
+        }else{
+<span class="nc" id="L87">            result = newProjectFlowService.disapproveProject(taskId,userId);</span>
+        }
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        if(result){</span>
+<span class="nc" id="L90">            return RestResponse.success(&quot;审核项目成功，已发邮件给相关人员！&quot;);</span>
+        }
+<span class="nc" id="L92">        return RestResponse.fail(&quot;无待审核的该项目&quot;);</span>
+    }
+
+    @PutMapping(&quot;/newproject/config&quot;)
+    public Object config(@RequestParam(&quot;taskId&quot;) String taskId,
+                                @RequestAttribute(&quot;userId&quot;) String userId, ProjectBasicInfo projectBasicInfo){
+<span class="nc bnc" id="L98" title="All 4 branches missed.">        if(ObjectUtils.isEmpty(projectBasicInfo.getGitAddress()) || ObjectUtils.isEmpty(projectBasicInfo.getFileSystemAddress())){</span>
+<span class="nc" id="L99">            return RestResponse.fail(&quot;请提供配置库地址&quot;);</span>
+        }
+
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        if(!employeeService.queryBasicEmployeeById(userId).getTitle().equals(EmployeeTitle.ORG_CONFIG.getTitleName())){</span>
+<span class="nc" id="L103">            return RestResponse.fail(&quot;该成员不是&quot; + EmployeeTitle.ORG_CONFIG.getTitleName() + &quot;，无法为项目建立配置库。&quot;);</span>
+        }
+
+<span class="nc" id="L106">        boolean result = newProjectFlowService.setProjectConfig(taskId, userId, projectBasicInfo);</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        if(!result){</span>
+<span class="nc" id="L108">            return RestResponse.fail();</span>
+        }
+<span class="nc" id="L110">        return RestResponse.success();</span>
+    }
+
+    @PutMapping(&quot;/newproject/member&quot;)
+    public Object member(@RequestParam(&quot;taskId&quot;) String taskId, @RequestParam(&quot;role&quot;) String role ,
+                         @RequestParam(&quot;ids&quot;) String[] ids,
+                         @RequestAttribute(&quot;userId&quot;) String userId){
+<span class="nc bnc" id="L117" title="All 2 branches missed.">        if(!ProjectRole.valid(role)){</span>
+<span class="nc" id="L118">            return RestResponse.fail(&quot;不能为项目设置该类型的成员：&quot; + role);</span>
+        }
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        if(!employeeService.queryBasicEmployeeById(userId).getTitle().contains(role)){</span>
+<span class="nc" id="L121">            return RestResponse.fail(&quot;当前用户不是&quot; + role + &quot; Leader，不能为项目添加&quot; + role);</span>
+        }
+<span class="nc" id="L123">        boolean result = newProjectFlowService.setProjectQaOrEpg(taskId,userId,role,ids);</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">        if(!result){</span>
+<span class="nc" id="L125">            return RestResponse.fail();</span>
+        }
+<span class="nc" id="L127">        return RestResponse.success();</span>
+    }
+
+    @GetMapping(&quot;/newproject/ids&quot;)
+    public Object getNewProjectIds(@RequestAttribute(&quot;userId&quot;) String userId){
+
+<span class="nc bnc" id="L133" title="All 2 branches missed.">        if(!employeeService.checkTitle(userId, EmployeeTitle.MANAGER.getTitleName())){</span>
+<span class="nc" id="L134">            return RestResponse.fail(&quot;该用户不是项目经理!&quot;);</span>
+        }
+<span class="nc" id="L136">        List&lt;ProjectId&gt; ids = projectIdService.querryProjectIds();</span>
+<span class="nc" id="L137">        Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L138">        result.put(&quot;ids&quot;, ids.stream().map(ProjectId::getProjectId).toArray(String[]::new));</span>
+
+<span class="nc" id="L140">        return RestResponse.success(result);</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

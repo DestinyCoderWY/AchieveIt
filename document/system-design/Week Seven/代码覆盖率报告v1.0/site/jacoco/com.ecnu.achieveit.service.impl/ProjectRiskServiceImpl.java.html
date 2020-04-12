@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProjectRiskServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">achieveit</a> &gt; <a href="index.source.html" class="el_package">com.ecnu.achieveit.service.impl</a> &gt; <span class="el_source">ProjectRiskServiceImpl.java</span></div><h1>ProjectRiskServiceImpl.java</h1><pre class="source lang-java linenums">package com.ecnu.achieveit.service.impl;
+
+import com.ecnu.achieveit.dao.ProjectRiskMapper;
+import com.ecnu.achieveit.dao.RiskRelatedMapper;
+import com.ecnu.achieveit.model.ProjectRisk;
+import com.ecnu.achieveit.model.ProjectRiskKey;
+import com.ecnu.achieveit.model.RiskRelatedKey;
+import com.ecnu.achieveit.service.ProjectRiskService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
+import java.util.List;
+
+@Transactional(rollbackFor = Exception.class)
+@Service
+<span class="fc" id="L18">public class ProjectRiskServiceImpl implements ProjectRiskService {</span>
+
+    @Autowired(required = false)
+    private ProjectRiskMapper riskMapper;
+
+    @Autowired(required = false)
+    private RiskRelatedMapper riskRelatedMapper;
+
+    @Override
+    public List&lt;ProjectRisk&gt; queryByProjectId(String projectId) {
+<span class="fc" id="L28">        return riskMapper.selectByProjectId(projectId);</span>
+    }
+
+    @Override
+    public List&lt;ProjectRisk&gt; queryByOwnerId(String ownerId) {
+<span class="fc" id="L33">        return riskMapper.selectByOwnerId(ownerId);</span>
+    }
+
+    @Override
+    public List&lt;ProjectRisk&gt; queryByRelatedId(String relatedId) {
+<span class="fc" id="L38">        return riskMapper.selectByRelatedId(relatedId);</span>
+    }
+
+    @Override
+    public boolean add(List&lt;ProjectRisk&gt; risks) {
+
+<span class="fc" id="L44">        boolean result = true;</span>
+
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        for(ProjectRisk risk : risks){</span>
+<span class="pc bpc" id="L47" title="2 of 4 branches missed.">            result = result &amp;&amp; riskMapper.insert(risk) == 1;</span>
+<span class="fc" id="L48">        }</span>
+
+<span class="fc" id="L50">        return result;</span>
+    }
+
+    @Override
+    public boolean add(ProjectRisk risk) {
+
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        return riskMapper.insert(risk) == 1;</span>
+    }
+
+    @Override
+    public boolean modify(ProjectRisk risk) {
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        return riskMapper.updateByPrimaryKeySelective(risk) == 1;</span>
+    }
+
+    @Override
+    public boolean remove(ProjectRiskKey riskKey) {
+
+<span class="fc" id="L67">        riskRelatedMapper.clear(riskKey.getProjectId(),riskKey.getRiskId());</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">        return riskMapper.deleteByPrimaryKey(riskKey) == 1;</span>
+    }
+
+    @Override
+    public List&lt;RiskRelatedKey&gt; queryRelatesByProjectIdAndRiskId(String projectId, String riskId) {
+<span class="fc" id="L73">        return riskRelatedMapper.selectByProjectRiskId(projectId, riskId);</span>
+    }
+
+    @Override
+    public boolean addRelated(RiskRelatedKey relatedKey) {
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">        return riskRelatedMapper.insert(relatedKey) == 1;</span>
+    }
+
+    @Override
+    public boolean removeRelated(RiskRelatedKey relatedKey) {
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">        return riskRelatedMapper.deleteByPrimaryKey(relatedKey) == 1;</span>
+    }
+
+    @Override
+    public boolean modifyRelates(List&lt;RiskRelatedKey&gt; riskRelatedKeys) {
+
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">        if(ObjectUtils.isEmpty(riskRelatedKeys)){</span>
+<span class="nc" id="L90">            return false;</span>
+        }
+
+<span class="fc" id="L93">        riskRelatedMapper.clear(riskRelatedKeys.get(0).getProjectId(),riskRelatedKeys.get(0).getRiskId());</span>
+
+<span class="fc" id="L95">        boolean result = true;</span>
+
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        for(RiskRelatedKey riskRelatedKey : riskRelatedKeys){</span>
+<span class="pc bpc" id="L98" title="2 of 4 branches missed.">            result = result &amp;&amp; riskRelatedMapper.insert(riskRelatedKey) == 1;</span>
+<span class="fc" id="L99">        }</span>
+
+<span class="fc" id="L101">        return result;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
