@@ -7,7 +7,7 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.Select;
 
-public class LoginTest {
+public class AchieveIt_ST_TD002_TC001 {
   private WebDriver driver;
   private String baseUrl;
   private boolean acceptNextAlert = true;
@@ -16,17 +16,18 @@ public class LoginTest {
   @Before
   public void setUp() throws Exception {
     driver = new FirefoxDriver();
-    baseUrl = "https://www.katalon.com/";
+    baseUrl = "https://www.google.com/";
     driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
   }
 
   @Test
   public void testLogin() throws Exception {
     driver.get("http://47.101.150.198/#/");
-    driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='’À∫≈'])[1]/following::input[1]")).click();
-    driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='’À∫≈'])[1]/following::input[1]")).click();
-    driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='√‹¬Î'])[1]/following::input[1]")).click();
-    driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='√‹¬Î'])[1]/following::span[3]")).click();
+    driver.findElement(By.xpath("//div[@id='pic']/div/form/div[3]/div/button/span")).click();
+    driver.findElement(By.xpath("//input[@type='text']")).click();
+    driver.findElement(By.xpath("//input[@type='text']")).clear();
+    driver.findElement(By.xpath("//input[@type='text']")).sendKeys("≤Ÿ◊˜");
+    driver.findElement(By.xpath("//div[@id='app']/section/section/main/div/div/div/div/div/div/button/i")).click();
   }
 
   @After
