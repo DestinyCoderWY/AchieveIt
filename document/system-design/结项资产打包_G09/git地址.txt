@@ -1,0 +1,4 @@
+前端代码git地址: https://github.com/snowren1123/achieveit-ui.git  
+后端代码git地址: https://github.com/Blueeyeimg/achieveit-server.git 
+测试代码git地址: https://github.com/DestinyCoderWY/AchieveIt/tree/master/testcode/AchieveItFunctionTest
+ 
